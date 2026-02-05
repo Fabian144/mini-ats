@@ -104,15 +104,29 @@ export function useCandidates() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+    // Optimistic update: move the card instantly, revert on error
+    onMutate: async (updated) => {
+      await queryClient.cancelQueries({ queryKey: ['candidates'] });
+      const previous = queryClient.getQueryData<Candidate[]>(['candidates', user?.id]);
+      if (previous) {
+        queryClient.setQueryData<Candidate[]>(['candidates', user?.id], (old) =>
+          (old ?? []).map((c) => (c.id === updated.id ? { ...c, ...updated } : c)),
+        );
+      }
+      return { previous };
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['candidates', user?.id], context.previous);
+      }
       toast({
         title: 'Kunde inte uppdatera kandidat',
         description: error.message,
         variant: 'destructive',
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['candidates'] });
     },
   });
 

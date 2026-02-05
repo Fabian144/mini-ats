@@ -5,9 +5,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Users, Shield, User } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
@@ -25,33 +37,39 @@ export default function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ email: '', password: '', fullName: '', role: 'customer' as AppRole });
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    fullName: '',
+    role: 'customer' as AppRole,
+  });
 
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, email, full_name');
+      // Single query: fetch profiles with their roles via a parallel Promise.all
+      const [profilesRes, rolesRes] = await Promise.all([
+        supabase.from('profiles').select('user_id, email, full_name'),
+        supabase.from('user_roles').select('user_id, role'),
+      ]);
 
-      if (profilesError) throw profilesError;
+      if (profilesRes.error) throw profilesRes.error;
+      if (rolesRes.error) throw rolesRes.error;
 
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
+      // Build a lookup map for O(1) role resolution instead of O(n) .find()
+      const roleMap = new Map<string, AppRole>();
+      for (const r of rolesRes.data) {
+        roleMap.set(r.user_id, r.role);
+      }
 
-      if (rolesError) throw rolesError;
-
-      return profiles.map((profile) => {
-        const userRole = roles.find((r) => r.user_id === profile.user_id);
-        return {
-          id: profile.user_id,
-          email: profile.email,
-          full_name: profile.full_name,
-          role: userRole?.role ?? 'customer',
-        } as UserWithRole;
-      });
+      return profilesRes.data.map((profile) => ({
+        id: profile.user_id,
+        email: profile.email,
+        full_name: profile.full_name,
+        role: roleMap.get(profile.user_id) ?? 'customer',
+      })) as UserWithRole[];
     },
+    staleTime: 1000 * 60 * 2,
   });
 
   const createUser = useMutation({
@@ -73,7 +91,7 @@ export default function Admin() {
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({ user_id: authData.user.id, role: 'admin' });
-        
+
         if (roleError) throw roleError;
       }
 
@@ -86,7 +104,11 @@ export default function Admin() {
       setNewUser({ email: '', password: '', fullName: '', role: 'customer' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte skapa användare', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte skapa användare',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -94,7 +116,7 @@ export default function Admin() {
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
       // Delete existing roles
       await supabase.from('user_roles').delete().eq('user_id', userId);
-      
+
       // Insert new role
       const { error } = await supabase.from('user_roles').insert({ user_id: userId, role });
       if (error) throw error;
@@ -104,7 +126,11 @@ export default function Admin() {
       toast({ title: 'Roll uppdaterad!' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte uppdatera roll', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte uppdatera roll',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -230,7 +256,9 @@ export default function Admin() {
                     <Label>Roll</Label>
                     <Select
                       value={user.role}
-                      onValueChange={(value) => updateRole.mutate({ userId: user.id, role: value as AppRole })}
+                      onValueChange={(value) =>
+                        updateRole.mutate({ userId: user.id, role: value as AppRole })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
