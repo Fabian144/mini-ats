@@ -17,12 +17,12 @@ CREATE INDEX IF NOT EXISTS idx_user_roles_user_role
   ON public.user_roles (user_id, role);
 
 -- 2. Add index on candidates(user_id) for faster owner lookups
-CREATE INDEX IF NOT EXISTS idx_candidates_user_id
-  ON public.candidates (user_id);
+CREATE INDEX IF NOT EXISTS idx_candidates_id
+  ON public.candidates (id);
 
 -- 3. Add index on jobs(user_id) for faster owner lookups
-CREATE INDEX IF NOT EXISTS idx_jobs_user_id
-  ON public.jobs (user_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_id
+  ON public.jobs (id);
 
 -- 4. Add index on candidates(status) for kanban grouping
 CREATE INDEX IF NOT EXISTS idx_candidates_status

@@ -83,15 +83,15 @@ grant execute on function public.has_role(uuid, app_role) to anon, authenticated
 -- Profiles policies
 CREATE POLICY "Users can view own profile"
     ON public.profiles FOR SELECT
-    USING (auth.uid() = user_id);
+    USING (auth.uid() = id);
 
 CREATE POLICY "Users can update own profile"
     ON public.profiles FOR UPDATE
-    USING (auth.uid() = user_id);
+    USING (auth.uid() = id);
 
 CREATE POLICY "Users can insert own profile"
     ON public.profiles FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (auth.uid() = id);
 
 -- Admin can view all profiles
 CREATE POLICY "Admins can view all profiles"
@@ -110,36 +110,36 @@ CREATE POLICY "Admins can manage roles"
 -- Jobs policies
 CREATE POLICY "Users can view own jobs"
     ON public.jobs FOR SELECT
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can insert own jobs"
     ON public.jobs FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own jobs"
     ON public.jobs FOR UPDATE
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can delete own jobs"
     ON public.jobs FOR DELETE
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 -- Candidates policies
 CREATE POLICY "Users can view own candidates"
     ON public.candidates FOR SELECT
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can insert own candidates"
     ON public.candidates FOR INSERT
-    WITH CHECK (auth.uid() = user_id);
+    WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update own candidates"
     ON public.candidates FOR UPDATE
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can delete own candidates"
     ON public.candidates FOR DELETE
-    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
 
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
