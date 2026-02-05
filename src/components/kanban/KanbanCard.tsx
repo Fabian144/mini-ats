@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Candidate } from '@/hooks/useCandidates';
 import { Linkedin, Mail, Phone, Briefcase } from 'lucide-react';
 
@@ -5,17 +6,13 @@ interface KanbanCardProps {
   candidate: Candidate;
 }
 
-export default function KanbanCard({ candidate }: KanbanCardProps) {
+const KanbanCard = memo(function KanbanCard({ candidate }: KanbanCardProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('candidateId', candidate.id);
   };
 
   return (
-    <div
-      draggable
-      onDragStart={handleDragStart}
-      className="kanban-card animate-fade-in"
-    >
+    <div draggable onDragStart={handleDragStart} className="kanban-card animate-fade-in">
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-medium text-foreground">{candidate.name}</h4>
         {candidate.linkedin_url && (
@@ -63,4 +60,6 @@ export default function KanbanCard({ candidate }: KanbanCardProps) {
       )}
     </div>
   );
-}
+});
+
+export default KanbanCard;

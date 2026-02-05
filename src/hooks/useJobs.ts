@@ -24,13 +24,15 @@ export function useJobs() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('jobs')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, user_id, title, company, description, location, created_at, updated_at')
+        .order('created_at', { ascending: false })
+        .limit(200);
 
       if (error) throw error;
       return data as Job[];
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 2,
   });
 
   const createJob = useMutation({
@@ -70,7 +72,11 @@ export function useJobs() {
       toast({ title: 'Jobb uppdaterat!' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte uppdatera jobb', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte uppdatera jobb',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -85,7 +91,11 @@ export function useJobs() {
       toast({ title: 'Jobb borttaget!' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte ta bort jobb', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte ta bort jobb',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 

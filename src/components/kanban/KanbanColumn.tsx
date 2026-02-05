@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Candidate } from '@/hooks/useCandidates';
 import KanbanCard from './KanbanCard';
 import type { Database } from '@/integrations/supabase/types';
@@ -20,7 +21,12 @@ const statusColors: Record<CandidateStatus, string> = {
   rejected: 'bg-status-rejected',
 };
 
-export default function KanbanColumn({ status, label, candidates, onStatusChange }: KanbanColumnProps) {
+const KanbanColumn = memo(function KanbanColumn({
+  status,
+  label,
+  candidates,
+  onStatusChange,
+}: KanbanColumnProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
@@ -34,7 +40,7 @@ export default function KanbanColumn({ status, label, candidates, onStatusChange
   };
 
   return (
-    <div 
+    <div
       className="kanban-column w-72 flex-shrink-0"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -52,11 +58,11 @@ export default function KanbanColumn({ status, label, candidates, onStatusChange
           <KanbanCard key={candidate.id} candidate={candidate} />
         ))}
         {candidates.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            Inga kandidater
-          </div>
+          <div className="text-center py-8 text-muted-foreground text-sm">Inga kandidater</div>
         )}
       </div>
     </div>
   );
-}
+});
+
+export default KanbanColumn;

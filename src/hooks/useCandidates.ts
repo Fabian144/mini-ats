@@ -35,24 +35,40 @@ export function useCandidates() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('candidates')
-        .select(`
-          *,
+        .select(
+          `
+          id,
+          user_id,
+          job_id,
+          name,
+          email,
+          phone,
+          linkedin_url,
+          notes,
+          status,
+          created_at,
+          updated_at,
           jobs (
             id,
             title,
             company
           )
-        `)
-        .order('created_at', { ascending: false });
+        `,
+        )
+        .order('created_at', { ascending: false })
+        .limit(200);
 
       if (error) throw error;
       return data as Candidate[];
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 2,
   });
 
   const createCandidate = useMutation({
-    mutationFn: async (candidate: Omit<Candidate, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'jobs'>) => {
+    mutationFn: async (
+      candidate: Omit<Candidate, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'jobs'>,
+    ) => {
       const { data, error } = await supabase
         .from('candidates')
         .insert({ ...candidate, user_id: user!.id })
@@ -67,7 +83,11 @@ export function useCandidates() {
       toast({ title: 'Kandidat tillagd!' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte lägga till kandidat', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte lägga till kandidat',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -88,7 +108,11 @@ export function useCandidates() {
       queryClient.invalidateQueries({ queryKey: ['candidates'] });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte uppdatera kandidat', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte uppdatera kandidat',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 
@@ -102,7 +126,11 @@ export function useCandidates() {
       toast({ title: 'Kandidat borttagen!' });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte ta bort kandidat', description: error.message, variant: 'destructive' });
+      toast({
+        title: 'Kunde inte ta bort kandidat',
+        description: error.message,
+        variant: 'destructive',
+      });
     },
   });
 

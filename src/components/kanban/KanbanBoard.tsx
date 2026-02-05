@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useCandidates, Candidate } from '@/hooks/useCandidates';
 import { useJobs } from '@/hooks/useJobs';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search, Filter } from 'lucide-react';
 import KanbanColumn from './KanbanColumn';
 import type { Database } from '@/integrations/supabase/types';
@@ -24,19 +30,30 @@ export default function KanbanBoard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedJobId, setSelectedJobId] = useState<string>('all');
 
-  const filteredCandidates = candidates.filter((candidate) => {
-    const matchesSearch = candidate.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesJob = selectedJobId === 'all' || candidate.job_id === selectedJobId;
-    return matchesSearch && matchesJob;
-  });
+  const filteredCandidates = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    return candidates.filter((candidate) => {
+      const matchesSearch = candidate.name.toLowerCase().includes(query);
+      const matchesJob = selectedJobId === 'all' || candidate.job_id === selectedJobId;
+      return matchesSearch && matchesJob;
+    });
+  }, [candidates, searchQuery, selectedJobId]);
 
-  const getCandidatesByStatus = (status: CandidateStatus) => {
-    return filteredCandidates.filter((c) => c.status === status);
-  };
+  const candidatesByStatus = useMemo(() => {
+    const map = new Map<CandidateStatus, Candidate[]>();
+    for (const s of STATUSES) map.set(s.key, []);
+    for (const c of filteredCandidates) {
+      map.get(c.status)?.push(c);
+    }
+    return map;
+  }, [filteredCandidates]);
 
-  const handleStatusChange = (candidateId: string, newStatus: CandidateStatus) => {
-    updateCandidate.mutate({ id: candidateId, status: newStatus });
-  };
+  const handleStatusChange = useCallback(
+    (candidateId: string, newStatus: CandidateStatus) => {
+      updateCandidate.mutate({ id: candidateId, status: newStatus });
+    },
+    [updateCandidate],
+  );
 
   if (isLoading) {
     return (
@@ -85,7 +102,7 @@ export default function KanbanBoard() {
               key={status.key}
               status={status.key}
               label={status.label}
-              candidates={getCandidatesByStatus(status.key)}
+              candidates={candidatesByStatus.get(status.key) ?? []}
               onStatusChange={handleStatusChange}
             />
           ))}
