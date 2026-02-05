@@ -1,58 +1,52 @@
 -- Create enum for user roles
-create type public.app_role as enum ('admin', 'customer');
+CREATE TYPE public.app_role AS ENUM ('admin', 'customer');
 
 -- Create enum for candidate status in pipeline
-create type public.candidate_status as enum (
-  'new',
-  'screening',
-  'interview',
-  'offer',
-  'hired',
-  'rejected'
-);
-
+CREATE TYPE public.candidate_status AS ENUM ('new', 'screening', 'interview', 'offer', 'hired', 'rejected');
 
 -- Create profiles table for additional user information
-create table public.profiles (
-  id uuid primary key references auth.users(id) on delete cascade,
-  email text not null,
-  full_name text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE public.profiles (
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    full_name TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
 -- Create user_roles table (separate from profiles for security)
-create table public.user_roles (
-  user_id uuid references auth.users(id) on delete cascade,
-  role app_role not null default 'customer',
-  primary key (user_id, role)
+CREATE TABLE public.user_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    role app_role NOT NULL DEFAULT 'customer',
+    UNIQUE (user_id, role)
 );
 
 -- Create jobs table
-create table public.jobs (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  company text,
-  description text,
-  location text,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE public.jobs (
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    company TEXT,
+    description TEXT,
+    location TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
 -- Create candidates table
-create table public.candidates (
-  id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
-  job_id uuid not null references public.jobs(id) on delete cascade,
-  name text not null,
-  email text,
-  phone text,
-  linkedin_url text,
-  notes text,
-  status candidate_status not null default 'new',
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+CREATE TABLE public.candidates (
+    id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    job_id UUID NOT NULL REFERENCES public.jobs(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    email TEXT,
+    phone TEXT,
+    linkedin_url TEXT,
+    notes TEXT,
+    status candidate_status NOT NULL DEFAULT 'new',
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
 -- Enable RLS on all tables
@@ -77,21 +71,18 @@ AS $$
     )
 $$;
 
-revoke all on function public.has_role(uuid, app_role) from public;
-grant execute on function public.has_role(uuid, app_role) to anon, authenticated;
-
 -- Profiles policies
 CREATE POLICY "Users can view own profile"
     ON public.profiles FOR SELECT
-    USING (auth.uid() = id);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own profile"
     ON public.profiles FOR UPDATE
-    USING (auth.uid() = id);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own profile"
     ON public.profiles FOR INSERT
-    WITH CHECK (auth.uid() = id);
+    WITH CHECK (auth.uid() = user_id);
 
 -- Admin can view all profiles
 CREATE POLICY "Admins can view all profiles"
@@ -110,36 +101,36 @@ CREATE POLICY "Admins can manage roles"
 -- Jobs policies
 CREATE POLICY "Users can view own jobs"
     ON public.jobs FOR SELECT
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can insert own jobs"
     ON public.jobs FOR INSERT
-    WITH CHECK (auth.uid() = id);
+    WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own jobs"
     ON public.jobs FOR UPDATE
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can delete own jobs"
     ON public.jobs FOR DELETE
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 -- Candidates policies
 CREATE POLICY "Users can view own candidates"
     ON public.candidates FOR SELECT
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can insert own candidates"
     ON public.candidates FOR INSERT
-    WITH CHECK (auth.uid() = id);
+    WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own candidates"
     ON public.candidates FOR UPDATE
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 CREATE POLICY "Users can delete own candidates"
     ON public.candidates FOR DELETE
-    USING (auth.uid() = id OR public.has_role(auth.uid(), 'admin'));
+    USING (auth.uid() = user_id OR public.has_role(auth.uid(), 'admin'));
 
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
