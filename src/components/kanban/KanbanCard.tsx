@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Candidate } from '@/hooks/useCandidates';
+import { safeExternalUrl } from '@/lib/utils';
 import { Linkedin, Mail, Phone, Briefcase } from 'lucide-react';
 
 interface KanbanCardProps {
@@ -11,13 +12,15 @@ const KanbanCard = memo(function KanbanCard({ candidate }: KanbanCardProps) {
     e.dataTransfer.setData('candidateId', candidate.id);
   };
 
+  const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
+
   return (
     <div draggable onDragStart={handleDragStart} className="kanban-card animate-fade-in">
       <div className="flex items-start justify-between gap-2 mb-2">
         <h4 className="font-medium text-foreground">{candidate.name}</h4>
-        {candidate.linkedin_url && (
+        {safeLinkedinUrl && (
           <a
-            href={candidate.linkedin_url}
+            href={safeLinkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:text-primary/80 transition-colors"

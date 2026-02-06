@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Users, Linkedin, Mail, Phone, Trash2, Edit, Briefcase } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
+import { safeExternalUrl } from '@/lib/utils';
 
 type CandidateStatus = Database['public']['Enums']['candidate_status'];
 
@@ -151,6 +152,7 @@ export default function Candidates() {
                 <div className="space-y-2">
                   <Label htmlFor="linkedin">LinkedIn URL</Label>
                   <Input
+										type='url'
                     id="linkedin"
                     value={formData.linkedin_url}
                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
@@ -220,68 +222,72 @@ export default function Candidates() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {candidates.map((candidate) => (
-              <Card key={candidate.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{candidate.name}</h3>
-                      {candidate.jobs && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                          <Briefcase className="w-3 h-3" />
-                          <span>{candidate.jobs.title}</span>
+            {candidates.map((candidate) => {
+              const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
+
+              return (
+                <Card key={candidate.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{candidate.name}</h3>
+                        {candidate.jobs && (
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                            <Briefcase className="w-3 h-3" />
+                            <span>{candidate.jobs.title}</span>
+                          </div>
+                        )}
+                      </div>
+                      <span className={`status-badge status-${candidate.status}`}>
+                        {statusLabels[candidate.status]}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                      {candidate.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4" />
+                          <span className="truncate">{candidate.email}</span>
                         </div>
                       )}
+                      {candidate.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4" />
+                          <span>{candidate.phone}</span>
+                        </div>
+                      )}
+                      {safeLinkedinUrl && (
+                        <a
+                          href={safeLinkedinUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-primary hover:underline"
+                        >
+                          <Linkedin className="w-4 h-4" />
+                          <span>LinkedIn-profil</span>
+                        </a>
+                      )}
                     </div>
-                    <span className={`status-badge status-${candidate.status}`}>
-                      {statusLabels[candidate.status]}
-                    </span>
-                  </div>
 
-                  <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                    {candidate.email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        <span className="truncate">{candidate.email}</span>
-                      </div>
-                    )}
-                    {candidate.phone && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        <span>{candidate.phone}</span>
-                      </div>
-                    )}
-                    {candidate.linkedin_url && (
-                      <a
-                        href={candidate.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-primary hover:underline"
+                    <div className="flex gap-1 pt-3 border-t border-border">
+                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(candidate)}>
+                        <Edit className="w-4 h-4 mr-1" />
+                        Redigera
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteCandidate.mutate(candidate.id)}
+                        className="text-destructive hover:text-destructive"
                       >
-                        <Linkedin className="w-4 h-4" />
-                        <span>LinkedIn-profil</span>
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex gap-1 pt-3 border-t border-border">
-                    <Button variant="ghost" size="sm" onClick={() => openEditDialog(candidate)}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Redigera
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteCandidate.mutate(candidate.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Ta bort
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Ta bort
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
