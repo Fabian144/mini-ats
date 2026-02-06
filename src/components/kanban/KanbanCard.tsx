@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { Candidate } from '@/hooks/useCandidates';
-import { safeExternalUrl } from '@/lib/utils';
-import { Linkedin, Mail, Phone, Briefcase } from 'lucide-react';
+import { memo } from "react";
+import { Candidate } from "@/hooks/useCandidates";
+import { safeExternalUrl } from "@/lib/utils";
+import { Linkedin, Mail, Phone, Briefcase } from "lucide-react";
 
 interface KanbanCardProps {
   candidate: Candidate;
@@ -9,7 +9,7 @@ interface KanbanCardProps {
 
 const KanbanCard = memo(function KanbanCard({ candidate }: KanbanCardProps) {
   const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData('candidateId', candidate.id);
+    e.dataTransfer.setData("candidateId", candidate.id);
   };
 
   const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);

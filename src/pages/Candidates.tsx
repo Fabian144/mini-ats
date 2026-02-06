@@ -1,53 +1,66 @@
-import { useState } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useCandidates, Candidate } from '@/hooks/useCandidates';
-import { useJobs } from '@/hooks/useJobs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Users, Linkedin, Mail, Phone, Trash2, Edit, Briefcase } from 'lucide-react';
-import type { Database } from '@/integrations/supabase/types';
-import { safeExternalUrl } from '@/lib/utils';
+import { useState } from "react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useCandidates, Candidate } from "@/hooks/useCandidates";
+import { useJobs } from "@/hooks/useJobs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Plus, Users, Linkedin, Mail, Phone, Trash2, Edit, Briefcase } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+import { safeExternalUrl } from "@/lib/utils";
 
-type CandidateStatus = Database['public']['Enums']['candidate_status'];
+type CandidateStatus = Database["public"]["Enums"]["candidate_status"];
 
 const statusLabels: Record<CandidateStatus, string> = {
-  new: 'Ny',
-  screening: 'Screening',
-  interview: 'Intervju',
-  offer: 'Erbjudande',
-  hired: 'Anställd',
-  rejected: 'Avslag',
+  new: "Ny",
+  screening: "Screening",
+  interview: "Intervju",
+  offer: "Erbjudande",
+  hired: "Anställd",
+  rejected: "Avslag",
 };
 
 export default function Candidates() {
-  const { candidates, isLoading, createCandidate, updateCandidate, deleteCandidate } = useCandidates();
+  const { candidates, isLoading, createCandidate, updateCandidate, deleteCandidate } =
+    useCandidates();
   const { jobs } = useJobs();
   const [isOpen, setIsOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    linkedin_url: '',
-    job_id: '',
-    status: 'new' as CandidateStatus,
-    notes: '',
+    name: "",
+    email: "",
+    phone: "",
+    linkedin_url: "",
+    job_id: "",
+    status: "new" as CandidateStatus,
+    notes: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingCandidate) {
       updateCandidate.mutate({ id: editingCandidate.id, ...formData });
     } else {
       createCandidate.mutate(formData);
     }
-    
+
     handleClose();
   };
 
@@ -55,12 +68,12 @@ export default function Candidates() {
     setEditingCandidate(candidate);
     setFormData({
       name: candidate.name,
-      email: candidate.email || '',
-      phone: candidate.phone || '',
-      linkedin_url: candidate.linkedin_url || '',
+      email: candidate.email || "",
+      phone: candidate.phone || "",
+      linkedin_url: candidate.linkedin_url || "",
       job_id: candidate.job_id,
       status: candidate.status,
-      notes: candidate.notes || '',
+      notes: candidate.notes || "",
     });
     setIsOpen(true);
   };
@@ -69,13 +82,13 @@ export default function Candidates() {
     setIsOpen(false);
     setEditingCandidate(null);
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      linkedin_url: '',
-      job_id: '',
-      status: 'new',
-      notes: '',
+      name: "",
+      email: "",
+      phone: "",
+      linkedin_url: "",
+      job_id: "",
+      status: "new",
+      notes: "",
     });
   };
 
@@ -87,7 +100,7 @@ export default function Candidates() {
             <h1 className="text-2xl font-bold text-foreground">Kandidater</h1>
             <p className="text-muted-foreground">Alla dina kandidater på ett ställe</p>
           </div>
-          <Dialog open={isOpen} onOpenChange={(open) => open ? setIsOpen(true) : handleClose()}>
+          <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : handleClose())}>
             <DialogTrigger asChild>
               <Button disabled={jobs.length === 0}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -96,7 +109,9 @@ export default function Candidates() {
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>{editingCandidate ? 'Redigera kandidat' : 'Lägg till kandidat'}</DialogTitle>
+                <DialogTitle>
+                  {editingCandidate ? "Redigera kandidat" : "Lägg till kandidat"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -152,7 +167,7 @@ export default function Candidates() {
                 <div className="space-y-2">
                   <Label htmlFor="linkedin">LinkedIn URL</Label>
                   <Input
-										type='url'
+                    type="url"
                     id="linkedin"
                     value={formData.linkedin_url}
                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
@@ -163,7 +178,9 @@ export default function Candidates() {
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value as CandidateStatus })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value as CandidateStatus })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -192,7 +209,7 @@ export default function Candidates() {
                     Avbryt
                   </Button>
                   <Button type="submit" disabled={!formData.job_id}>
-                    {editingCandidate ? 'Spara' : 'Lägg till'}
+                    {editingCandidate ? "Spara" : "Lägg till"}
                   </Button>
                 </div>
               </form>
