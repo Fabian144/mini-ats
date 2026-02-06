@@ -20,8 +20,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Shield, User } from "lucide-react";
+import { Plus, Users, Shield, User, Trash2 } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -36,7 +47,7 @@ interface UserWithRole {
 
 export default function Admin() {
   const { toast } = useToast();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [newUser, setNewUser] = useState({
@@ -133,6 +144,28 @@ export default function Admin() {
     onError: (error: Error) => {
       toast({
         title: "Kunde inte uppdatera roll",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUser = useMutation({
+    mutationFn: async (userId: string) => {
+      if (currentUser?.id === userId) {
+        throw new Error("Du kan inte ta bort ditt eget konto.");
+      }
+
+      const { error } = await supabase.rpc("delete_user", { _user_id: userId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({ title: "Konto borttaget." });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Kunde inte ta bort konto",
         description: error.message,
         variant: "destructive",
       });
@@ -240,24 +273,67 @@ export default function Admin() {
             {users.map((user) => (
               <Card key={user.id}>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      {user.role === "admin" ? (
-                        <Shield className="w-5 h-5 text-primary" />
-                      ) : (
-                        <User className="w-5 h-5 text-primary" />
-                      )}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        {user.role === "admin" ? (
+                          <Shield className="w-5 h-5 text-primary" />
+                        ) : (
+                          <User className="w-5 h-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="text-base truncate">
+                          {user.full_name || "Namnlös"}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base truncate">
-                        {user.full_name || "Namnlös"}
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                    </div>
+                    {isAdmin && currentUser?.id !== user.id ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="destructive"
+                            className="whitespace-nowrap"
+                            disabled={deleteUser.isPending}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {deleteUser.isPending ? "Tar bort..." : "Ta bort konto"}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Ta bort kundkonto?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Detta tar bort kontot och all tillhörande data. Åtgärden går inte att
+                              ångra.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel asChild>
+                              <Button type="button" variant="outline">
+                                Avbryt
+                              </Button>
+                            </AlertDialogCancel>
+                            <AlertDialogAction asChild>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={() => deleteUser.mutate(user.id)}
+                              >
+                                Ta bort
+                              </Button>
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : null}
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Label>Roll</Label>
                     <Select
                       value={user.role}
