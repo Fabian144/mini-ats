@@ -9,7 +9,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">Rekryteringsöversikt</h1>
           <p className="text-muted-foreground">Dra och släpp kandidater för att ändra status</p>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1">
           <KanbanBoard />
         </div>
       </div>
