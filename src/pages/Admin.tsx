@@ -1,30 +1,31 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Shield, User } from 'lucide-react';
-import type { Database } from '@/integrations/supabase/types';
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Users, Shield, User } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
 
-type AppRole = Database['public']['Enums']['app_role'];
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 interface UserWithRole {
   id: string;
@@ -35,22 +36,23 @@ interface UserWithRole {
 
 export default function Admin() {
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [newUser, setNewUser] = useState({
-    email: '',
-    password: '',
-    fullName: '',
-    role: 'customer' as AppRole,
+    email: "",
+    password: "",
+    fullName: "",
+    role: "customer" as AppRole,
   });
 
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ['admin-users'],
+    queryKey: ["admin-users"],
     queryFn: async () => {
       // Single query: fetch profiles with their roles via a parallel Promise.all
       const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from('profiles').select('user_id, email, full_name'),
-        supabase.from('user_roles').select('user_id, role'),
+        supabase.from("profiles").select("user_id, email, full_name"),
+        supabase.from("user_roles").select("user_id, role"),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -66,7 +68,7 @@ export default function Admin() {
         id: profile.user_id,
         email: profile.email,
         full_name: profile.full_name,
-        role: roleMap.get(profile.user_id) ?? 'customer',
+        role: roleMap.get(profile.user_id) ?? "customer",
       })) as UserWithRole[];
     },
     staleTime: 1000 * 60 * 2,
@@ -84,13 +86,13 @@ export default function Admin() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('Användare skapades inte');
+      if (!authData.user) throw new Error("Användare skapades inte");
 
       // If admin role, we need to add it (trigger creates customer by default)
-      if (role === 'admin' && authData.user) {
+      if (role === "admin" && authData.user) {
         const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: authData.user.id, role: 'admin' });
+          .from("user_roles")
+          .insert({ user_id: authData.user.id, role: "admin" });
 
         if (roleError) throw roleError;
       }
@@ -98,38 +100,41 @@ export default function Admin() {
       return authData;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast({ title: 'Användare skapad!' });
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({ title: "Användare skapad!" });
       setIsOpen(false);
-      setNewUser({ email: '', password: '', fullName: '', role: 'customer' });
+      setNewUser({ email: "", password: "", fullName: "", role: "customer" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte skapa användare',
+        title: "Kunde inte skapa användare",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
 
   const updateRole = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
+      if (currentUser?.id === userId && role === "customer") {
+        throw new Error("Du kan inte ändra din egen roll till kund.");
+      }
       // Delete existing roles
-      await supabase.from('user_roles').delete().eq('user_id', userId);
+      await supabase.from("user_roles").delete().eq("user_id", userId);
 
       // Insert new role
-      const { error } = await supabase.from('user_roles').insert({ user_id: userId, role });
+      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast({ title: 'Roll uppdaterad!' });
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({ title: "Roll uppdaterad!" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte uppdatera roll',
+        title: "Kunde inte uppdatera roll",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -212,7 +217,7 @@ export default function Admin() {
                     Avbryt
                   </Button>
                   <Button type="submit" disabled={createUser.isPending}>
-                    {createUser.isPending ? 'Skapar...' : 'Skapa användare'}
+                    {createUser.isPending ? "Skapar..." : "Skapa användare"}
                   </Button>
                 </div>
               </form>
@@ -237,7 +242,7 @@ export default function Admin() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      {user.role === 'admin' ? (
+                      {user.role === "admin" ? (
                         <Shield className="w-5 h-5 text-primary" />
                       ) : (
                         <User className="w-5 h-5 text-primary" />
@@ -245,7 +250,7 @@ export default function Admin() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-base truncate">
-                        {user.full_name || 'Namnlös'}
+                        {user.full_name || "Namnlös"}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                     </div>
@@ -264,7 +269,9 @@ export default function Admin() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="customer">Kund</SelectItem>
+                        <SelectItem value="customer" disabled={currentUser?.id === user.id}>
+                          Kund
+                        </SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
