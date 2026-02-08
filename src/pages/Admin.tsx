@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { userCreationClient } from "@/integrations/supabase/userCreationClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,7 +90,7 @@ export default function Admin() {
   const createUser = useMutation({
     mutationFn: async ({ email, password, fullName, role }: typeof newUser) => {
       // Create user via auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await userCreationClient.auth.signUp({
         email,
         password,
         options: {
