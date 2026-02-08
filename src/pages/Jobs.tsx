@@ -6,7 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Plus, Briefcase, MapPin, Building2, Trash2, Edit } from 'lucide-react';
 
 export default function Jobs() {
@@ -22,13 +28,13 @@ export default function Jobs() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editingJob) {
       updateJob.mutate({ id: editingJob.id, ...formData });
     } else {
       createJob.mutate(formData);
     }
-    
+
     setIsOpen(false);
     setEditingJob(null);
     setFormData({ title: '', company: '', location: '', description: '' });
@@ -59,7 +65,7 @@ export default function Jobs() {
             <h1 className="text-2xl font-bold text-foreground">Jobb</h1>
             <p className="text-muted-foreground">Hantera dina rekryteringsuppdrag</p>
           </div>
-          <Dialog open={isOpen} onOpenChange={(open) => open ? setIsOpen(true) : handleClose()}>
+          <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : handleClose())}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
@@ -113,9 +119,7 @@ export default function Jobs() {
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Avbryt
                   </Button>
-                  <Button type="submit">
-                    {editingJob ? 'Spara' : 'Skapa'}
-                  </Button>
+                  <Button type="submit">{editingJob ? 'Spara' : 'Skapa'}</Button>
                 </div>
               </form>
             </DialogContent>
@@ -129,13 +133,15 @@ export default function Jobs() {
             <CardContent>
               <Briefcase className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="font-medium text-lg mb-2">Inga jobb ännu</h3>
-              <p className="text-muted-foreground mb-4">Lägg till ditt första rekryteringsuppdrag</p>
+              <p className="text-muted-foreground mb-4">
+                Lägg till ditt första rekryteringsuppdrag
+              </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
+              <Card key={job.id}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{job.title}</CardTitle>
@@ -143,9 +149,9 @@ export default function Jobs() {
                       <Button variant="ghost" size="icon" onClick={() => openEditDialog(job)}>
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => deleteJob.mutate(job.id)}
                         className="text-destructive hover:text-destructive"
                       >

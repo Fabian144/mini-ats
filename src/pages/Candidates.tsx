@@ -1,39 +1,39 @@
-import { useState } from "react";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useCandidates, Candidate } from "@/hooks/useCandidates";
-import { useJobs } from "@/hooks/useJobs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useCandidates, Candidate } from '@/hooks/useCandidates';
+import { useJobs } from '@/hooks/useJobs';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
+} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus, Users, Linkedin, Mail, Phone, Trash2, Edit, Briefcase } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
-import { safeExternalUrl } from "@/lib/utils";
+} from '@/components/ui/dialog';
+import { Plus, Users, Linkedin, Mail, Phone, Trash2, Edit, Briefcase } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+import { safeExternalUrl } from '@/lib/utils';
 
-type CandidateStatus = Database["public"]["Enums"]["candidate_status"];
+type CandidateStatus = Database['public']['Enums']['candidate_status'];
 
 const statusLabels: Record<CandidateStatus, string> = {
-  new: "Ny",
-  screening: "Screening",
-  interview: "Intervju",
-  offer: "Erbjudande",
-  hired: "Anställd",
-  rejected: "Avslag",
+  new: 'Ny',
+  screening: 'Screening',
+  interview: 'Intervju',
+  offer: 'Erbjudande',
+  hired: 'Anställd',
+  rejected: 'Avslag',
 };
 
 export default function Candidates() {
@@ -43,13 +43,13 @@ export default function Candidates() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    linkedin_url: "",
-    job_id: "",
-    status: "new" as CandidateStatus,
-    notes: "",
+    name: '',
+    email: '',
+    phone: '',
+    linkedin_url: '',
+    job_id: '',
+    status: 'new' as CandidateStatus,
+    notes: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -68,12 +68,12 @@ export default function Candidates() {
     setEditingCandidate(candidate);
     setFormData({
       name: candidate.name,
-      email: candidate.email || "",
-      phone: candidate.phone || "",
-      linkedin_url: candidate.linkedin_url || "",
+      email: candidate.email || '',
+      phone: candidate.phone || '',
+      linkedin_url: candidate.linkedin_url || '',
       job_id: candidate.job_id,
       status: candidate.status,
-      notes: candidate.notes || "",
+      notes: candidate.notes || '',
     });
     setIsOpen(true);
   };
@@ -82,13 +82,13 @@ export default function Candidates() {
     setIsOpen(false);
     setEditingCandidate(null);
     setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      linkedin_url: "",
-      job_id: "",
-      status: "new",
-      notes: "",
+      name: '',
+      email: '',
+      phone: '',
+      linkedin_url: '',
+      job_id: '',
+      status: 'new',
+      notes: '',
     });
   };
 
@@ -110,7 +110,7 @@ export default function Candidates() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>
-                  {editingCandidate ? "Redigera kandidat" : "Lägg till kandidat"}
+                  {editingCandidate ? 'Redigera kandidat' : 'Lägg till kandidat'}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -209,7 +209,7 @@ export default function Candidates() {
                     Avbryt
                   </Button>
                   <Button type="submit" disabled={!formData.job_id}>
-                    {editingCandidate ? "Spara" : "Lägg till"}
+                    {editingCandidate ? 'Spara' : 'Lägg till'}
                   </Button>
                 </div>
               </form>
@@ -243,7 +243,7 @@ export default function Candidates() {
               const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
 
               return (
-                <Card key={candidate.id} className="hover:shadow-md transition-shadow">
+                <Card key={candidate.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-3">
                       <div>
