@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -119,31 +120,6 @@ export default function Admin() {
     onError: (error: Error) => {
       toast({
         title: "Kunde inte skapa användare",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const updateRole = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: AppRole }) => {
-      if (currentUser?.id === userId && role === "customer") {
-        throw new Error("Du kan inte ändra din egen roll till kund.");
-      }
-      // Delete existing roles
-      await supabase.from("user_roles").delete().eq("user_id", userId);
-
-      // Insert new role
-      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: "Roll uppdaterad!" });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Kunde inte uppdatera roll",
         description: error.message,
         variant: "destructive",
       });
@@ -334,23 +310,12 @@ export default function Admin() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <Label>Roll</Label>
-                    <Select
-                      value={user.role}
-                      onValueChange={(value) =>
-                        updateRole.mutate({ userId: user.id, role: value as AppRole })
-                      }
+                    <Badge
+                      variant={user.role === "admin" ? "default" : "secondary"}
+                      className="pointer-events-none"
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="customer" disabled={currentUser?.id === user.id}>
-                          Kund
-                        </SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {user.role === "admin" ? "Admin" : "Kund"}
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>
