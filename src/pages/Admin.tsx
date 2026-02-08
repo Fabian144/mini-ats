@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import { supabase } from "@/integrations/supabase/client";
-import { userCreationClient } from "@/integrations/supabase/userCreationClient";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { supabase } from '@/integrations/supabase/client';
+import { userCreationClient } from '@/integrations/supabase/userCreationClient';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,13 +32,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Shield, User, Trash2 } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
-import { useAuth } from "@/contexts/AuthContext";
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, Users, Shield, User, Trash2 } from 'lucide-react';
+import type { Database } from '@/integrations/supabase/types';
+import { useAuth } from '@/contexts/AuthContext';
 
-type AppRole = Database["public"]["Enums"]["app_role"];
+type AppRole = Database['public']['Enums']['app_role'];
 
 interface UserWithRole {
   id: string;
@@ -52,20 +52,21 @@ export default function Admin() {
   const { user: currentUser, isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({
-    email: "",
-    password: "",
-    fullName: "",
-    role: "customer" as AppRole,
+    email: '',
+    password: '',
+    fullName: '',
+    role: 'customer' as AppRole,
   });
 
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ["admin-users"],
+    queryKey: ['admin-users'],
     queryFn: async () => {
       // Single query: fetch profiles with their roles via a parallel Promise.all
       const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("user_id, email, full_name"),
-        supabase.from("user_roles").select("user_id, role"),
+        supabase.from('profiles').select('user_id, email, full_name'),
+        supabase.from('user_roles').select('user_id, role'),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -81,7 +82,7 @@ export default function Admin() {
         id: profile.user_id,
         email: profile.email,
         full_name: profile.full_name,
-        role: roleMap.get(profile.user_id) ?? "customer",
+        role: roleMap.get(profile.user_id) ?? 'customer',
       })) as UserWithRole[];
     },
     staleTime: 1000 * 60 * 2,
@@ -99,13 +100,13 @@ export default function Admin() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("Användare skapades inte");
+      if (!authData.user) throw new Error('Användare skapades inte');
 
       // If admin role, we need to add it (trigger creates customer by default)
-      if (role === "admin" && authData.user) {
+      if (role === 'admin' && authData.user) {
         const { error: roleError } = await supabase
-          .from("user_roles")
-          .insert({ user_id: authData.user.id, role: "admin" });
+          .from('user_roles')
+          .insert({ user_id: authData.user.id, role: 'admin' });
 
         if (roleError) throw roleError;
       }
@@ -113,16 +114,16 @@ export default function Admin() {
       return authData;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: "Användare skapad!" });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast({ title: 'Användare skapad!' });
       setIsOpen(false);
-      setNewUser({ email: "", password: "", fullName: "", role: "customer" });
+      setNewUser({ email: '', password: '', fullName: '', role: 'customer' });
     },
     onError: (error: Error) => {
       toast({
-        title: "Kunde inte skapa användare",
+        title: 'Kunde inte skapa användare',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     },
   });
@@ -130,22 +131,28 @@ export default function Admin() {
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
       if (currentUser?.id === userId) {
-        throw new Error("Du kan inte ta bort ditt eget konto.");
+        throw new Error('Du kan inte ta bort ditt eget konto.');
       }
 
-      const { error } = await supabase.rpc("delete_user", { _user_id: userId });
+      const { error } = await supabase.rpc('delete_user', { _user_id: userId });
       if (error) throw error;
     },
+    onMutate: (userId) => {
+      setDeletingUserId(userId);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
-      toast({ title: "Konto borttaget." });
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toast({ title: 'Konto borttaget.' });
     },
     onError: (error: Error) => {
       toast({
-        title: "Kunde inte ta bort konto",
+        title: 'Kunde inte ta bort konto',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
+    },
+    onSettled: () => {
+      setDeletingUserId(null);
     },
   });
 
@@ -227,7 +234,7 @@ export default function Admin() {
                     Avbryt
                   </Button>
                   <Button type="submit" disabled={createUser.isPending}>
-                    {createUser.isPending ? "Skapar..." : "Skapa användare"}
+                    {createUser.isPending ? 'Skapar...' : 'Skapa användare'}
                   </Button>
                 </div>
               </form>
@@ -253,7 +260,7 @@ export default function Admin() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        {user.role === "admin" ? (
+                        {user.role === 'admin' ? (
                           <Shield className="w-5 h-5 text-primary" />
                         ) : (
                           <User className="w-5 h-5 text-primary" />
@@ -261,12 +268,12 @@ export default function Admin() {
                       </div>
                       <div className="min-w-0">
                         <CardTitle className="text-base truncate">
-                          {user.full_name || "Namnlös"}
+                          {user.full_name || 'Namnlös'}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
-                    {isAdmin && currentUser?.id !== user.id ? (
+                    {isAdmin && user.role === 'customer' && currentUser?.id !== user.id ? (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -274,10 +281,12 @@ export default function Admin() {
                             size="sm"
                             variant="destructive"
                             className="whitespace-nowrap"
-                            disabled={deleteUser.isPending}
+                            disabled={deleteUser.isPending && deletingUserId === user.id}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
-                            {deleteUser.isPending ? "Tar bort..." : "Ta bort konto"}
+                            {deleteUser.isPending && deletingUserId === user.id
+                              ? 'Tar bort...'
+                              : 'Ta bort konto'}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -312,10 +321,10 @@ export default function Admin() {
                 <CardContent>
                   <div className="space-y-3">
                     <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
+                      variant={user.role === 'admin' ? 'default' : 'secondary'}
                       className="pointer-events-none"
                     >
-                      {user.role === "admin" ? "Admin" : "Kund"}
+                      {user.role === 'admin' ? 'Admin' : 'Kund'}
                     </Badge>
                   </div>
                 </CardContent>
