@@ -32,3 +32,26 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.delete_user(UUID) TO authenticated;
+
+-- Allow users to delete their own account
+CREATE OR REPLACE FUNCTION public.delete_own_account()
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  DELETE FROM auth.users
+  WHERE id = auth.uid();
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'User not found';
+  END IF;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.delete_own_account() TO authenticated;
