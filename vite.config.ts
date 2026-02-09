@@ -40,5 +40,5 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-	base: "/mini-ats/",
+	base: "/mini-ats/auth/",
 }));
