@@ -1,4 +1,4 @@
-## What technologies are used for this project?
+## Technologies
 
 This project is built with:
 
