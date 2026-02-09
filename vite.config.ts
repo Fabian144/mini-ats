@@ -40,5 +40,4 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-	base: "/mini-ats/",
 }));
