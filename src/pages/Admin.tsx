@@ -49,7 +49,7 @@ interface UserWithRole {
 
 export default function Admin() {
   const { toast } = useToast();
-  const { user: currentUser, isAdmin } = useAuth();
+  const { user: currentUser, isAdmin, signOut } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
@@ -121,12 +121,14 @@ export default function Admin() {
 
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      if (currentUser?.id === userId) {
-        throw new Error('Du kan inte ta bort ditt eget konto.');
-      }
-
-      const { error } = await supabase.rpc('delete_user', { _user_id: userId });
+      const isSelf = currentUser?.id === userId;
+      const { error } = isSelf
+        ? await supabase.rpc('delete_own_account')
+        : await supabase.rpc('delete_user', { _user_id: userId });
       if (error) throw error;
+      if (isSelf) {
+        await signOut();
+      }
     },
     onMutate: (userId) => {
       setDeletingUserId(userId);
@@ -264,7 +266,7 @@ export default function Admin() {
                         <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
-                    {isAdmin && currentUser?.id !== user.id ? (
+                    {isAdmin ? (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button

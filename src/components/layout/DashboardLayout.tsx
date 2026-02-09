@@ -4,20 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Users, Briefcase, LayoutDashboard, LogOut, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -34,8 +22,6 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // Prefetch both candidates and jobs as soon as the layout mounts
   // so navigating between Dashboard/Jobs/Candidates is instant
@@ -76,22 +62,6 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
-  };
-
-  const handleDeleteAccount = async () => {
-    setIsDeletingAccount(true);
-    const { error } = await deleteAccount();
-    if (error) {
-      toast({
-        title: 'Kunde inte ta bort konto',
-        description: error.message,
-        variant: 'destructive',
-      });
-      setIsDeletingAccount(false);
-      return;
-    }
-
     navigate('/auth');
   };
 
@@ -157,43 +127,6 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
               <p className="text-xs text-sidebar-foreground/60">{isAdmin ? 'Admin' : 'Kund'}</p>
             </div>
           </div>
-					{isAdmin && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-destructive hover:text-destructive hover:bg-sidebar-accent/50"
-              >
-                Ta bort konto
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Ta bort ditt konto?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Detta tar bort ditt konto och all tillhörande data. Åtgärden går inte att ångra.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel asChild>
-                  <Button type="button" variant="outline">
-                    Avbryt
-                  </Button>
-                </AlertDialogCancel>
-                <AlertDialogAction asChild>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={handleDeleteAccount}
-                    disabled={isDeletingAccount}
-                  >
-                    {isDeletingAccount ? 'Tar bort...' : 'Ta bort konto'}
-                  </Button>
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-					)}
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
