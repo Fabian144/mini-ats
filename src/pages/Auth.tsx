@@ -152,7 +152,7 @@ export default function Auth() {
         description: 'Du kan nu logga in med ditt nya lösenord.',
       });
       clearRecoveryUrl();
-      navigate('/dashboard');
+      navigate('/auth');
     }
 
     setUpdatingPassword(false);
