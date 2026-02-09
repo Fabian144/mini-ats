@@ -275,6 +275,7 @@ export default function Admin() {
                       <div className="min-w-0">
                         <CardTitle className="text-base truncate">
                           {user.full_name || 'Namnlös'}
+                          {user.id === currentUser?.id ? ' (Du)' : ''}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
