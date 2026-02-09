@@ -157,6 +157,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
               <p className="text-xs text-sidebar-foreground/60">{isAdmin ? 'Admin' : 'Kund'}</p>
             </div>
           </div>
+					{isAdmin && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
@@ -192,6 +193,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+					)}
           <Button
             variant="ghost"
             className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
