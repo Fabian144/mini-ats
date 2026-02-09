@@ -6,9 +6,9 @@ import {
   useRef,
   useCallback,
   ReactNode,
-} from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+} from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthContextType {
   user: User | null;
@@ -38,12 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const cached = sessionStorage.getItem(cacheKey);
     if (cached !== null) {
       // Still verify in background but return cached value immediately
-      const cachedResult = cached === 'true';
+      const cachedResult = cached === "true";
       supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
         .maybeSingle()
         .then(({ data }) => {
           const fresh = !!data;
@@ -56,10 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .eq('role', 'admin')
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
       .maybeSingle();
     const result = !!data;
     sessionStorage.setItem(cacheKey, String(result));
@@ -127,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/mini-ats/auth`,
+      redirectTo: `${window.location.origin}/mini-ats/recovery`,
     });
     return { error };
   };
@@ -147,10 +147,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const deleteAccount = async () => {
     if (!user?.id) {
-      return { error: new Error('Not authenticated') };
+      return { error: new Error("Not authenticated") };
     }
 
-    const { error } = await supabase.rpc('delete_own_account');
+    const { error } = await supabase.rpc("delete_own_account");
     if (error) {
       return { error };
     }
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
