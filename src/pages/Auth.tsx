@@ -99,7 +99,7 @@ export default function Auth() {
     } else {
       toast({
         title: 'E-post skickad',
-        description: 'Kontrollera din inkorg för återställningslänken.',
+        description: 'Om ett konto med den e-postadressen existerar så har en återställningslänk skickats dit.',
       });
     }
 
