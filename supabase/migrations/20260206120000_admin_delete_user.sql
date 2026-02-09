@@ -18,10 +18,6 @@ BEGIN
     RAISE EXCEPTION 'Cannot delete own account';
   END IF;
 
-  IF public.has_role(_user_id, 'admin') THEN
-    RAISE EXCEPTION 'Cannot delete admin accounts';
-  END IF;
-
   DELETE FROM auth.users
   WHERE id = _user_id;
 

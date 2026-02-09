@@ -273,7 +273,7 @@ export default function Admin() {
                         <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
-                    {isAdmin && user.role === 'customer' && currentUser?.id !== user.id ? (
+                    {isAdmin && currentUser?.id !== user.id ? (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
@@ -291,7 +291,7 @@ export default function Admin() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Ta bort kundkonto?</AlertDialogTitle>
+                            <AlertDialogTitle>Ta bort konto?</AlertDialogTitle>
                             <AlertDialogDescription>
                               Detta tar bort kontot och all tillhörande data. Åtgärden går inte att
                               ångra.
