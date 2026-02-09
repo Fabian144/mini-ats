@@ -90,26 +90,17 @@ export default function Admin() {
 
   const createUser = useMutation({
     mutationFn: async ({ email, password, fullName, role }: typeof newUser) => {
-      // Create user via auth
+      // Create user via auth with initial role in metadata
       const { data: authData, error: authError } = await userCreationClient.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { full_name: fullName, role },
         },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error('Användare skapades inte');
-
-      // If admin role, we need to add it (trigger creates customer by default)
-      if (role === 'admin' && authData.user) {
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: authData.user.id, role: 'admin' });
-
-        if (roleError) throw roleError;
-      }
 
       return authData;
     },
