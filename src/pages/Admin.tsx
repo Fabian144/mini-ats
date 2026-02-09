@@ -154,6 +154,19 @@ export default function Admin() {
     createUser.mutate(newUser);
   };
 
+  const sortedUsers = [...users].sort((a, b) => {
+    const currentId = currentUser?.id;
+    const aIsSelf = a.id === currentId;
+    const bIsSelf = b.id === currentId;
+    if (aIsSelf !== bIsSelf) return aIsSelf ? -1 : 1;
+
+    const aIsAdmin = a.role === 'admin';
+    const bIsAdmin = b.role === 'admin';
+    if (aIsAdmin !== bIsAdmin) return aIsAdmin ? -1 : 1;
+
+    return a.email.localeCompare(b.email);
+  });
+
   return (
     <DashboardLayout>
       <div className="p-6">
@@ -247,7 +260,7 @@ export default function Admin() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {users.map((user) => (
+            {sortedUsers.map((user) => (
               <Card key={user.id}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
