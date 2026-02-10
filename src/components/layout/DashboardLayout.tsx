@@ -4,6 +4,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Users, Briefcase, LayoutDashboard, LogOut, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +37,9 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   const effectiveUserId = isAdmin && adminViewAccount?.id ? adminViewAccount.id : user?.id;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || "Alla konton";
   const userName =
-    profileName || (user?.user_metadata as { full_name?: string } | undefined)?.full_name || user?.email;
+    profileName ||
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name ||
+    user?.email;
 
   useEffect(() => {
     if (!user?.id) {
@@ -168,14 +181,34 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
               <p className="text-xs text-sidebar-foreground/60">{isAdmin ? "Admin" : "Kund"}</p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-            onClick={handleSignOut}
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logga ut
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logga ut
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Logga ut från kontot?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel asChild>
+                  <Button type="button" variant="outline">
+                    Avbryt
+                  </Button>
+                </AlertDialogCancel>
+                <AlertDialogAction asChild>
+                  <Button type="button" onClick={handleSignOut}>
+                    Logga ut
+                  </Button>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </aside>
 
