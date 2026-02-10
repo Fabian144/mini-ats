@@ -205,9 +205,7 @@ export default function Jobs() {
                   </Label>
                   <Select
                     value={formData.employment_type}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, employment_type: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, employment_type: value })}
                   >
                     <SelectTrigger id="employmentType">
                       <SelectValue placeholder="Välj anställningsform" />
@@ -229,9 +227,7 @@ export default function Jobs() {
                       type="number"
                       min="0"
                       value={formData.salary_amount}
-                      onChange={(e) =>
-                        setFormData({ ...formData, salary_amount: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, salary_amount: e.target.value })}
                       placeholder="t.ex. 35000"
                     />
                   </div>
@@ -239,9 +235,7 @@ export default function Jobs() {
                     <Label htmlFor="salaryUnit">Lönetyp</Label>
                     <Select
                       value={formData.salary_unit}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, salary_unit: value })
-                      }
+                      onValueChange={(value) => setFormData({ ...formData, salary_unit: value })}
                     >
                       <SelectTrigger id="salaryUnit">
                         <SelectValue placeholder="Välj" />
@@ -292,9 +286,9 @@ export default function Jobs() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-wrap gap-2">
             {jobs.map((job) => (
-              <Card key={job.id}>
+              <Card key={job.id} className="w-full min-w-0 max-w-[35em] flex-[1_1_365px]">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{job.title}</CardTitle>

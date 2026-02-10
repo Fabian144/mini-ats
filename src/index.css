@@ -168,8 +168,8 @@
   }
 
   .kanban-column {
-    height: auto;
-    overflow: auto;
+    height: 2em;
+    overflow: scroll;
     min-height: clamp(520px, 70vh, 720px);
     @apply flex flex-col bg-muted/50 rounded-xl p-3;
   }

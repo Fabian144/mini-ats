@@ -265,12 +265,12 @@ export default function Candidates() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-wrap gap-2">
             {candidates.map((candidate) => {
               const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
 
               return (
-                <Card key={candidate.id}>
+                <Card key={candidate.id} className="w-full min-w-0 max-w-[35em] flex-[1_1_365px]">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-3">
                       <div>

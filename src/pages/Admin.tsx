@@ -270,7 +270,7 @@ export default function Admin() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(410px,100%),1fr))]">
             {sortedUsers.map((user) => (
               <Card key={user.id} className="w-full min-w-0">
                 <CardHeader className="pb-3">
@@ -304,10 +304,7 @@ export default function Admin() {
                               (user.role === "admin" && adminCount === 1)
                             }
                           >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            {deleteUser.isPending && deletingUserId === user.id
-                              ? "Tar bort..."
-                              : "Ta bort konto"}
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
