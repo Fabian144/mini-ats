@@ -288,18 +288,16 @@ export default function Candidates() {
                     </div>
 
                     <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                      {candidate.email && (
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          <span className="truncate">{candidate.email}</span>
-                        </div>
-                      )}
-                      {candidate.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4" />
-                          <span>{candidate.phone}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        <span className="truncate">
+                          {candidate.email || "Ingen e-post angiven"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        <span>{candidate.phone || "Inget telefonnummer angivet"}</span>
+                      </div>
                       {safeLinkedinUrl ? (
                         <a
                           href={safeLinkedinUrl}
