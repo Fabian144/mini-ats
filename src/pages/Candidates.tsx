@@ -295,7 +295,7 @@ export default function Candidates() {
                           <span>{candidate.phone}</span>
                         </div>
                       )}
-                      {safeLinkedinUrl && (
+                      {safeLinkedinUrl ? (
                         <a
                           href={safeLinkedinUrl}
                           target="_blank"
@@ -305,6 +305,11 @@ export default function Candidates() {
                           <Linkedin className="w-4 h-4" />
                           <span>LinkedIn-profil</span>
                         </a>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Linkedin className="w-4 h-4" />
+                          <span>Ingen LinkedIn-profil angiven</span>
+                        </div>
                       )}
                     </div>
 

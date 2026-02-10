@@ -350,9 +350,11 @@ export default function Admin() {
                           setAdminViewAccount(null);
                         }}
                       >
-                        {user.id === currentUser?.id && !adminViewAccount
-                          ? "Visar alla konton"
-                          : "Visa alla konton"}
+                        {user.id !== currentUser?.id
+                          ? "Visa konto"
+                          : user.id === currentUser?.id && !adminViewAccount
+                            ? "Visar alla konton"
+                            : "Visa alla konton"}
                         <ArrowRight className="w-4 h-4" />
                       </Button>
                     )}
