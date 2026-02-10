@@ -30,6 +30,9 @@ CREATE TABLE public.jobs (
     company TEXT,
     description TEXT,
     location TEXT,
+    employment_type TEXT,
+    salary_amount NUMERIC,
+    salary_unit TEXT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
@@ -148,13 +151,26 @@ CREATE POLICY "Users can delete own candidates"
 -- Function to handle new user creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    _role public.app_role;
 BEGIN
     INSERT INTO public.profiles (user_id, email, full_name)
     VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'full_name');
-    
+
+    -- Honour the role supplied in user metadata (e.g. admin-created users),
+    -- but fall back to 'customer' for normal sign-ups or invalid values.
+    BEGIN
+        _role := (NEW.raw_user_meta_data->>'role')::public.app_role;
+    EXCEPTION WHEN OTHERS THEN
+        _role := 'customer';
+    END;
+    IF _role IS NULL THEN
+        _role := 'customer';
+    END IF;
+
     INSERT INTO public.user_roles (user_id, role)
-    VALUES (NEW.id, 'customer');
-    
+    VALUES (NEW.id, _role);
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
@@ -185,3 +201,21 @@ CREATE TRIGGER update_jobs_updated_at
 CREATE TRIGGER update_candidates_updated_at
     BEFORE UPDATE ON public.candidates
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- ============================================================
+-- Grants: let the authenticated role access all tables/functions
+-- through PostgREST.  RLS policies handle row-level security.
+-- ============================================================
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles      TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_roles     TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.jobs           TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.candidates     TO authenticated;
+
+GRANT ALL ON public.profiles      TO service_role;
+GRANT ALL ON public.user_roles     TO service_role;
+GRANT ALL ON public.jobs           TO service_role;
+GRANT ALL ON public.candidates     TO service_role;
+
+GRANT EXECUTE ON FUNCTION public.has_role(UUID, public.app_role) TO authenticated;
