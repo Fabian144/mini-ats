@@ -22,8 +22,38 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [profileName, setProfileName] = useState<string | null>(null);
   const effectiveUserId = isAdmin && adminViewAccount?.id ? adminViewAccount.id : user?.id;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || "Alla konton";
+  const userName =
+    profileName || (user?.user_metadata as { full_name?: string } | undefined)?.full_name || user?.email;
+
+  useEffect(() => {
+    if (!user?.id) {
+      setProfileName(null);
+      return;
+    }
+
+    let isActive = true;
+
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!isActive) return;
+        if (error) {
+          setProfileName(null);
+          return;
+        }
+        setProfileName(data?.full_name ?? null);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.id]);
 
   // Prefetch both candidates and jobs as soon as the layout mounts
   // so navigating between Dashboard/Jobs/Candidates is instant
@@ -133,7 +163,8 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
               <span className="text-sm font-medium">{user?.email?.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user?.email}</p>
+              <p className="text-sm font-medium truncate">{userName}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
               <p className="text-xs text-sidebar-foreground/60">{isAdmin ? "Admin" : "Kund"}</p>
             </div>
           </div>
