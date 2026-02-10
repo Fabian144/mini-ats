@@ -270,9 +270,9 @@ export default function Admin() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {sortedUsers.map((user) => (
-              <Card key={user.id}>
+              <Card key={user.id} className="w-full min-w-0">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
