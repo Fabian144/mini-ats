@@ -27,7 +27,7 @@ export function useJobs() {
       let query = supabase
         .from("jobs")
         .select("id, user_id, title, company, description, location, created_at, updated_at")
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: true })
         .limit(200);
 
       if (!isAllAccountsView) {

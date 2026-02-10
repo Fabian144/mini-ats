@@ -57,7 +57,7 @@ export function useCandidates() {
           )
         `,
         )
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: true })
         .limit(200);
 
       if (!isAllAccountsView) {
