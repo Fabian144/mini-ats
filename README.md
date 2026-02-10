@@ -15,6 +15,8 @@ The application features an authentication system, role-based access control (Ad
 -   **Intuitive UI**: Smooth and immediate UI feedback for actions like updating candidate status, with user friendly error handling.
 -   **Responsive Design**: A user-friendly experience on both desktop and mobile devices.
 
+### Live demo: https://fabian144.github.io/mini-ats/
+
 ## Tech Stack 🛠️
 
 -   **Frontend**: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
