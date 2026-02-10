@@ -51,10 +51,17 @@ export default function Auth() {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Konto skapat!",
-        description: "Kontrollera din e-post för att verifiera kontot.",
-      });
+      const { error: signInError } = await signIn(email, password);
+
+      if (signInError) {
+        toast({
+          title: "Kunde inte logga in",
+          description: signInError.message,
+          variant: "destructive",
+        });
+      } else {
+        navigate("/dashboard");
+      }
     }
 
     setLoading(false);
