@@ -193,7 +193,9 @@ export default function Admin() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Fullständigt namn</Label>
+                  <Label htmlFor="fullName">
+                    Fullständigt namn <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="fullName"
                     value={newUser.fullName}
@@ -203,7 +205,9 @@ export default function Admin() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">E-post</Label>
+                  <Label htmlFor="email">
+                    E-post <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="email"
                     type="email"
@@ -214,7 +218,9 @@ export default function Admin() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Lösenord</Label>
+                  <Label htmlFor="password">
+                    Lösenord <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="password"
                     type="password"

@@ -107,6 +107,7 @@ export default function Candidates() {
 
   const isAllAccountsView = isAdmin && !adminViewAccount;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || user?.email;
+  const isCandidateFormValid = formData.name.trim().length > 0 && formData.job_id.length > 0;
 
   return (
     <DashboardLayout>
@@ -137,7 +138,9 @@ export default function Candidates() {
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Namn *</Label>
+                  <Label htmlFor="name">
+                    Namn <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -147,7 +150,9 @@ export default function Candidates() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="job">Jobb *</Label>
+                  <Label htmlFor="job">
+                    Jobb <span className="text-destructive">*</span>
+                  </Label>
                   <Select
                     value={formData.job_id}
                     onValueChange={(value) => setFormData({ ...formData, job_id: value })}
@@ -230,7 +235,7 @@ export default function Candidates() {
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Avbryt
                   </Button>
-                  <Button type="submit" disabled={!formData.job_id}>
+                  <Button type="submit" disabled={!isCandidateFormValid}>
                     {editingCandidate ? "Spara" : "Lägg till"}
                   </Button>
                 </div>

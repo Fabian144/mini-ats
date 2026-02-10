@@ -130,6 +130,12 @@ export default function Jobs() {
 
   const isAllAccountsView = isAdmin && !adminViewAccount;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || user?.email;
+  const isJobFormValid =
+    formData.title.trim().length > 0 &&
+    formData.company.trim().length > 0 &&
+    formData.location.trim().length > 0 &&
+    formData.employment_type.trim().length > 0 &&
+    !(formData.salary_amount && !formData.salary_unit);
 
   return (
     <DashboardLayout>
@@ -158,7 +164,9 @@ export default function Jobs() {
               )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Jobbtitel *</Label>
+                  <Label htmlFor="title">
+                    Jobbtitel <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="title"
                     value={formData.title}
@@ -168,25 +176,33 @@ export default function Jobs() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Företag</Label>
+                  <Label htmlFor="company">
+                    Företag <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="company"
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                     placeholder="t.ex. TechAB"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location">Plats</Label>
+                  <Label htmlFor="location">
+                    Plats <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     placeholder="t.ex. Stockholm"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="employmentType">Anställningsform</Label>
+                  <Label htmlFor="employmentType">
+                    Anställningsform <span className="text-destructive">*</span>
+                  </Label>
                   <Select
                     value={formData.employment_type}
                     onValueChange={(value) =>
@@ -254,10 +270,7 @@ export default function Jobs() {
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Avbryt
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={!formData.employment_type || !!(formData.salary_amount && !formData.salary_unit)}
-                  >
+                  <Button type="submit" disabled={!isJobFormValid}>
                     {editingJob ? "Spara" : "Skapa"}
                   </Button>
                 </div>

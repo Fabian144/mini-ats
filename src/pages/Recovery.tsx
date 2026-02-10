@@ -95,7 +95,9 @@ export default function Recovery() {
           <CardContent>
             <form onSubmit={handleUpdatePassword} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="new-password">Nytt lösenord</Label>
+                <Label htmlFor="new-password">
+                  Nytt lösenord <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -107,7 +109,9 @@ export default function Recovery() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">Bekräfta lösenord</Label>
+                <Label htmlFor="confirm-password">
+                  Bekräfta lösenord <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="confirm-password"
                   type="password"
