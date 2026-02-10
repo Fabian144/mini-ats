@@ -286,9 +286,9 @@ export default function Jobs() {
             </CardContent>
           </Card>
         ) : (
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,25em),1fr))]">
             {jobs.map((job) => (
-              <Card key={job.id} className="w-full min-w-0 max-w-[35em] flex-[1_1_365px]">
+              <Card key={job.id} className="w-full min-w-0">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{job.title}</CardTitle>
