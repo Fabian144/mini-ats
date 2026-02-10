@@ -63,8 +63,11 @@ export type Database = {
           company: string | null;
           created_at: string;
           description: string | null;
+          employment_type: string | null;
           id: string;
           location: string | null;
+          salary_amount: number | null;
+          salary_unit: string | null;
           title: string;
           updated_at: string;
           user_id: string;
@@ -73,8 +76,11 @@ export type Database = {
           company?: string | null;
           created_at?: string;
           description?: string | null;
+          employment_type?: string | null;
           id?: string;
           location?: string | null;
+          salary_amount?: number | null;
+          salary_unit?: string | null;
           title: string;
           updated_at?: string;
           user_id: string;
@@ -83,8 +89,11 @@ export type Database = {
           company?: string | null;
           created_at?: string;
           description?: string | null;
+          employment_type?: string | null;
           id?: string;
           location?: string | null;
+          salary_amount?: number | null;
+          salary_unit?: string | null;
           title?: string;
           updated_at?: string;
           user_id?: string;

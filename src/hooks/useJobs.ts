@@ -10,6 +10,9 @@ export interface Job {
   company: string | null;
   description: string | null;
   location: string | null;
+  employment_type: string | null;
+  salary_amount: number | null;
+  salary_unit: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -26,7 +29,9 @@ export function useJobs() {
     queryFn: async () => {
       let query = supabase
         .from("jobs")
-        .select("id, user_id, title, company, description, location, created_at, updated_at")
+        .select(
+          "id, user_id, title, company, description, location, employment_type, salary_amount, salary_unit, created_at, updated_at",
+        )
         .order("created_at", { ascending: true })
         .limit(200);
 

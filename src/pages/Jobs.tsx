@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -27,6 +34,25 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Plus, Briefcase, MapPin, Building2, Trash2, Edit } from "lucide-react";
 
+const EMPLOYMENT_TYPES = [
+  "Deltid",
+  "Tillsvidare",
+  "Heltid",
+  "Säsongsarbete",
+  "Vikariat",
+  "Extrajobb",
+  "Sommarjobb",
+  "Visstid",
+  "Möjlighet till förnyat kontrakt",
+  "Projekt",
+  "Praktik",
+];
+
+const SALARY_UNITS = [
+  { value: "monthly", label: "Månadsvis" },
+  { value: "hourly", label: "Timlön" },
+];
+
 export default function Jobs() {
   const { isAdmin, adminViewAccount, user } = useAuth();
   const { jobs, isLoading, createJob, updateJob, deleteJob } = useJobs();
@@ -37,20 +63,41 @@ export default function Jobs() {
     company: "",
     location: "",
     description: "",
+    employment_type: "",
+    salary_amount: "",
+    salary_unit: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.employment_type) return;
+    if (formData.salary_amount && !formData.salary_unit) return;
+
+    const payload = {
+      ...formData,
+      employment_type: formData.employment_type || null,
+      salary_amount: formData.salary_amount ? Number(formData.salary_amount) : null,
+      salary_unit: formData.salary_unit || null,
+    };
+
     if (editingJob) {
-      updateJob.mutate({ id: editingJob.id, ...formData });
+      updateJob.mutate({ id: editingJob.id, ...payload });
     } else {
-      createJob.mutate(formData);
+      createJob.mutate(payload);
     }
 
     setIsOpen(false);
     setEditingJob(null);
-    setFormData({ title: "", company: "", location: "", description: "" });
+    setFormData({
+      title: "",
+      company: "",
+      location: "",
+      description: "",
+      employment_type: "",
+      salary_amount: "",
+      salary_unit: "",
+    });
   };
 
   const openEditDialog = (job: Job) => {
@@ -60,6 +107,9 @@ export default function Jobs() {
       company: job.company || "",
       location: job.location || "",
       description: job.description || "",
+      employment_type: job.employment_type || "",
+      salary_amount: job.salary_amount?.toString() || "",
+      salary_unit: job.salary_unit || "",
     });
     setIsOpen(true);
   };
@@ -67,7 +117,15 @@ export default function Jobs() {
   const handleClose = () => {
     setIsOpen(false);
     setEditingJob(null);
-    setFormData({ title: "", company: "", location: "", description: "" });
+    setFormData({
+      title: "",
+      company: "",
+      location: "",
+      description: "",
+      employment_type: "",
+      salary_amount: "",
+      salary_unit: "",
+    });
   };
 
   const isAllAccountsView = isAdmin && !adminViewAccount;
@@ -128,6 +186,61 @@ export default function Jobs() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="employmentType">Anställningsform</Label>
+                  <Select
+                    value={formData.employment_type}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, employment_type: value })
+                    }
+                  >
+                    <SelectTrigger id="employmentType">
+                      <SelectValue placeholder="Välj anställningsform" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EMPLOYMENT_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="salaryAmount">Lön</Label>
+                    <Input
+                      id="salaryAmount"
+                      type="number"
+                      min="0"
+                      value={formData.salary_amount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, salary_amount: e.target.value })
+                      }
+                      placeholder="t.ex. 35000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="salaryUnit">Lönetyp</Label>
+                    <Select
+                      value={formData.salary_unit}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, salary_unit: value })
+                      }
+                    >
+                      <SelectTrigger id="salaryUnit">
+                        <SelectValue placeholder="Välj" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SALARY_UNITS.map((unit) => (
+                          <SelectItem key={unit.value} value={unit.value}>
+                            {unit.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="description">Beskrivning</Label>
                   <Textarea
                     id="description"
@@ -141,7 +254,12 @@ export default function Jobs() {
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Avbryt
                   </Button>
-                  <Button type="submit">{editingJob ? "Spara" : "Skapa"}</Button>
+                  <Button
+                    type="submit"
+                    disabled={!formData.employment_type || !!(formData.salary_amount && !formData.salary_unit)}
+                  >
+                    {editingJob ? "Spara" : "Skapa"}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -224,11 +342,29 @@ export default function Jobs() {
                         <span>{job.location}</span>
                       </div>
                     )}
-                    {job.description && (
-                      <p className="line-clamp-2 pt-2 border-t border-border mt-3">
-                        {job.description}
-                      </p>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {job.employment_type
+                          ? `Anställningsform: ${job.employment_type}`
+                          : "Anställningsform: Ej angiven"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {job.salary_amount
+                          ? `Lön: ${Number(job.salary_amount).toLocaleString("sv-SE")} kr`
+                          : "Lön: Ej angiven"}
+                        {job.salary_amount &&
+                          (job.salary_unit === "hourly"
+                            ? " / tim"
+                            : job.salary_unit === "monthly"
+                              ? " / mån"
+                              : "")}
+                      </span>
+                    </div>
+                    <p className="line-clamp-2 pt-2 border-t border-border mt-3">
+                      {job.description || "Ingen beskrivning angiven"}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
