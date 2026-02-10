@@ -18,7 +18,7 @@ const navItems = [
 ];
 
 const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user, signOut, isAdmin, deleteAccount } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
