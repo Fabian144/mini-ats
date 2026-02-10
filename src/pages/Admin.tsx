@@ -170,6 +170,8 @@ export default function Admin() {
     return a.email.localeCompare(b.email);
   });
 
+  const adminCount = users.filter((user) => user.role === "admin").length;
+
   return (
     <DashboardLayout>
       <div className="p-6">
@@ -291,7 +293,10 @@ export default function Admin() {
                             size="sm"
                             variant="destructive"
                             className="whitespace-nowrap"
-                            disabled={deleteUser.isPending && deletingUserId === user.id}
+                            disabled={
+                              (deleteUser.isPending && deletingUserId === user.id) ||
+                              (user.role === "admin" && adminCount === 1)
+                            }
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             {deleteUser.isPending && deletingUserId === user.id
