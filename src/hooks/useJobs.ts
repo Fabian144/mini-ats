@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Job {
   id: string;
@@ -15,31 +15,41 @@ export interface Job {
 }
 
 export function useJobs() {
-  const { user } = useAuth();
+  const { user, isAdmin, adminViewAccount } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const targetUserId = adminViewAccount?.id ?? user?.id;
+  const isAllAccountsView = isAdmin && !adminViewAccount;
 
   const jobsQuery = useQuery({
-    queryKey: ['jobs', user?.id],
+    queryKey: ["jobs", isAllAccountsView ? "all" : targetUserId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('jobs')
-        .select('id, user_id, title, company, description, location, created_at, updated_at')
-        .order('created_at', { ascending: false })
+      let query = supabase
+        .from("jobs")
+        .select("id, user_id, title, company, description, location, created_at, updated_at")
+        .order("created_at", { ascending: false })
         .limit(200);
+
+      if (!isAllAccountsView) {
+        query = query.eq("user_id", targetUserId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Job[];
     },
-    enabled: !!user,
+    enabled: isAllAccountsView ? isAdmin : !!targetUserId,
     staleTime: 1000 * 60 * 2,
+    refetchOnMount: "always",
   });
 
   const createJob = useMutation({
-    mutationFn: async (job: Omit<Job, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (job: Omit<Job, "id" | "user_id" | "created_at" | "updated_at">) => {
+      if (!targetUserId) throw new Error("Missing target account for job creation");
       const { data, error } = await supabase
-        .from('jobs')
-        .insert({ ...job, user_id: user!.id })
+        .from("jobs")
+        .insert({ ...job, user_id: targetUserId! })
         .select()
         .single();
 
@@ -47,20 +57,20 @@ export function useJobs() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      toast({ title: 'Jobb skapat!' });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast({ title: "Jobb skapat!" });
     },
     onError: (error: Error) => {
-      toast({ title: 'Kunde inte skapa jobb', description: error.message, variant: 'destructive' });
+      toast({ title: "Kunde inte skapa jobb", description: error.message, variant: "destructive" });
     },
   });
 
   const updateJob = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Job> & { id: string }) => {
       const { data, error } = await supabase
-        .from('jobs')
+        .from("jobs")
         .update(updates)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -68,33 +78,33 @@ export function useJobs() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      toast({ title: 'Jobb uppdaterat!' });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      toast({ title: "Jobb uppdaterat!" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte uppdatera jobb',
+        title: "Kunde inte uppdatera jobb",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
 
   const deleteJob = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('jobs').delete().eq('id', id);
+      const { error } = await supabase.from("jobs").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
-      toast({ title: 'Jobb borttaget!' });
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
+      toast({ title: "Jobb borttaget!" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte ta bort jobb',
+        title: "Kunde inte ta bort jobb",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });

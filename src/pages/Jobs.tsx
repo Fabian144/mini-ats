@@ -1,29 +1,31 @@
-import { useState } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useJobs, Job } from '@/hooks/useJobs';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from "react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { useJobs, Job } from "@/hooks/useJobs";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Plus, Briefcase, MapPin, Building2, Trash2, Edit } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Plus, Briefcase, MapPin, Building2, Trash2, Edit } from "lucide-react";
 
 export default function Jobs() {
+  const { isAdmin, adminViewAccount, user } = useAuth();
   const { jobs, isLoading, createJob, updateJob, deleteJob } = useJobs();
   const [isOpen, setIsOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [formData, setFormData] = useState({
-    title: '',
-    company: '',
-    location: '',
-    description: '',
+    title: "",
+    company: "",
+    location: "",
+    description: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -37,16 +39,16 @@ export default function Jobs() {
 
     setIsOpen(false);
     setEditingJob(null);
-    setFormData({ title: '', company: '', location: '', description: '' });
+    setFormData({ title: "", company: "", location: "", description: "" });
   };
 
   const openEditDialog = (job: Job) => {
     setEditingJob(job);
     setFormData({
       title: job.title,
-      company: job.company || '',
-      location: job.location || '',
-      description: job.description || '',
+      company: job.company || "",
+      location: job.location || "",
+      description: job.description || "",
     });
     setIsOpen(true);
   };
@@ -54,8 +56,11 @@ export default function Jobs() {
   const handleClose = () => {
     setIsOpen(false);
     setEditingJob(null);
-    setFormData({ title: '', company: '', location: '', description: '' });
+    setFormData({ title: "", company: "", location: "", description: "" });
   };
+
+  const isAllAccountsView = isAdmin && !adminViewAccount;
+  const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || user?.email;
 
   return (
     <DashboardLayout>
@@ -67,15 +72,21 @@ export default function Jobs() {
           </div>
           <Dialog open={isOpen} onOpenChange={(open) => (open ? setIsOpen(true) : handleClose())}>
             <DialogTrigger asChild>
-              <Button>
+              <Button disabled={isAllAccountsView}>
                 <Plus className="w-4 h-4 mr-2" />
                 Lägg till jobb
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingJob ? 'Redigera jobb' : 'Lägg till jobb'}</DialogTitle>
+                <DialogTitle>{editingJob ? "Redigera jobb" : "Lägg till jobb"}</DialogTitle>
               </DialogHeader>
+              {accountLabel && (
+                <p className="text-xs text-muted-foreground">
+                  {editingJob ? "Redigeras för konto" : "Skapas för konto"}
+                  <span className="font-medium">{accountLabel}</span>
+                </p>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Jobbtitel *</Label>
@@ -119,7 +130,7 @@ export default function Jobs() {
                   <Button type="button" variant="outline" onClick={handleClose}>
                     Avbryt
                   </Button>
-                  <Button type="submit">{editingJob ? 'Spara' : 'Skapa'}</Button>
+                  <Button type="submit">{editingJob ? "Spara" : "Skapa"}</Button>
                 </div>
               </form>
             </DialogContent>

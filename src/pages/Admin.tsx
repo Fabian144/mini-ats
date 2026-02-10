@@ -1,27 +1,27 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { supabase } from '@/integrations/supabase/client';
-import { userCreationClient } from '@/integrations/supabase/userCreationClient';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { userCreationClient } from "@/integrations/supabase/userCreationClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,13 +32,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Plus, Users, Shield, User, Trash2 } from 'lucide-react';
-import type { Database } from '@/integrations/supabase/types';
-import { useAuth } from '@/contexts/AuthContext';
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Plus, Users, Shield, User, Trash2, ArrowRight } from "lucide-react";
+import type { Database } from "@/integrations/supabase/types";
+import { useAuth } from "@/contexts/AuthContext";
 
-type AppRole = Database['public']['Enums']['app_role'];
+type AppRole = Database["public"]["Enums"]["app_role"];
 
 interface UserWithRole {
   id: string;
@@ -49,24 +49,24 @@ interface UserWithRole {
 
 export default function Admin() {
   const { toast } = useToast();
-  const { user: currentUser, isAdmin, signOut } = useAuth();
+  const { user: currentUser, isAdmin, signOut, adminViewAccount, setAdminViewAccount } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({
-    email: '',
-    password: '',
-    fullName: '',
-    role: 'customer' as AppRole,
+    email: "",
+    password: "",
+    fullName: "",
+    role: "customer" as AppRole,
   });
 
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ['admin-users'],
+    queryKey: ["admin-users"],
     queryFn: async () => {
       // Single query: fetch profiles with their roles via a parallel Promise.all
       const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from('profiles').select('user_id, email, full_name'),
-        supabase.from('user_roles').select('user_id, role'),
+        supabase.from("profiles").select("user_id, email, full_name"),
+        supabase.from("user_roles").select("user_id, role"),
       ]);
 
       if (profilesRes.error) throw profilesRes.error;
@@ -82,7 +82,7 @@ export default function Admin() {
         id: profile.user_id,
         email: profile.email,
         full_name: profile.full_name,
-        role: roleMap.get(profile.user_id) ?? 'customer',
+        role: roleMap.get(profile.user_id) ?? "customer",
       })) as UserWithRole[];
     },
     staleTime: 1000 * 60 * 2,
@@ -100,21 +100,21 @@ export default function Admin() {
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error('Användare skapades inte');
+      if (!authData.user) throw new Error("Användare skapades inte");
 
       return authData;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast({ title: 'Användare skapad!' });
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({ title: "Användare skapad!" });
       setIsOpen(false);
-      setNewUser({ email: '', password: '', fullName: '', role: 'customer' });
+      setNewUser({ email: "", password: "", fullName: "", role: "customer" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte skapa användare',
+        title: "Kunde inte skapa användare",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -123,8 +123,8 @@ export default function Admin() {
     mutationFn: async (userId: string) => {
       const isSelf = currentUser?.id === userId;
       const { error } = isSelf
-        ? await supabase.rpc('delete_own_account')
-        : await supabase.rpc('delete_user', { _user_id: userId });
+        ? await supabase.rpc("delete_own_account")
+        : await supabase.rpc("delete_user", { _user_id: userId });
       if (error) throw error;
       if (isSelf) {
         await signOut();
@@ -133,15 +133,18 @@ export default function Admin() {
     onMutate: (userId) => {
       setDeletingUserId(userId);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      toast({ title: 'Konto borttaget.' });
+    onSuccess: (_data, userId) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      if (adminViewAccount?.id === userId && currentUser?.id !== userId) {
+        setAdminViewAccount(null);
+      }
+      toast({ title: "Konto borttaget." });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte ta bort konto',
+        title: "Kunde inte ta bort konto",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
     onSettled: () => {
@@ -160,8 +163,8 @@ export default function Admin() {
     const bIsSelf = b.id === currentId;
     if (aIsSelf !== bIsSelf) return aIsSelf ? -1 : 1;
 
-    const aIsAdmin = a.role === 'admin';
-    const bIsAdmin = b.role === 'admin';
+    const aIsAdmin = a.role === "admin";
+    const bIsAdmin = b.role === "admin";
     if (aIsAdmin !== bIsAdmin) return aIsAdmin ? -1 : 1;
 
     return a.email.localeCompare(b.email);
@@ -240,7 +243,7 @@ export default function Admin() {
                     Avbryt
                   </Button>
                   <Button type="submit" disabled={createUser.isPending}>
-                    {createUser.isPending ? 'Skapar...' : 'Skapa användare'}
+                    {createUser.isPending ? "Skapar..." : "Skapa användare"}
                   </Button>
                 </div>
               </form>
@@ -266,7 +269,7 @@ export default function Admin() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        {user.role === 'admin' ? (
+                        {user.role === "admin" ? (
                           <Shield className="w-5 h-5 text-primary" />
                         ) : (
                           <User className="w-5 h-5 text-primary" />
@@ -274,8 +277,8 @@ export default function Admin() {
                       </div>
                       <div className="min-w-0">
                         <CardTitle className="text-base truncate">
-                          {user.full_name || 'Namnlös'}
-                          {user.id === currentUser?.id ? ' (Du)' : ''}
+                          {user.full_name || "Namnlös"}
+                          {user.id === currentUser?.id ? " (Du)" : ""}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground truncate">{user.email}</p>
                       </div>
@@ -292,8 +295,8 @@ export default function Admin() {
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             {deleteUser.isPending && deletingUserId === user.id
-                              ? 'Tar bort...'
-                              : 'Ta bort konto'}
+                              ? "Tar bort..."
+                              : "Ta bort konto"}
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -328,11 +331,49 @@ export default function Admin() {
                 <CardContent>
                   <div className="space-y-3">
                     <Badge
-                      variant={user.role === 'admin' ? 'default' : 'secondary'}
+                      variant={user.role === "admin" ? "default" : "secondary"}
                       className="pointer-events-none"
                     >
-                      {user.role === 'admin' ? 'Admin' : 'Kund'}
+                      {user.role === "admin" ? "Admin" : "Kund"}
                     </Badge>
+                    {user.role === "admin" && isAdmin && (
+                      <Button
+                        type="button"
+                        variant={
+                          user.id === currentUser?.id && !adminViewAccount ? "default" : "outline"
+                        }
+                        size="sm"
+                        className="w-full justify-between"
+                        disabled={user.id !== currentUser?.id}
+                        onClick={() => {
+                          if (user.id !== currentUser?.id) return;
+                          setAdminViewAccount(null);
+                        }}
+                      >
+                        {user.id === currentUser?.id && !adminViewAccount
+                          ? "Visar alla konton"
+                          : "Visa alla konton"}
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {user.role === "customer" && isAdmin && (
+                      <Button
+                        type="button"
+                        variant={adminViewAccount?.id === user.id ? "default" : "outline"}
+                        size="sm"
+                        className="w-full justify-between"
+                        onClick={() => {
+                          setAdminViewAccount({
+                            id: user.id,
+                            email: user.email,
+                            fullName: user.full_name,
+                          });
+                        }}
+                      >
+                        {adminViewAccount?.id === user.id ? "Visar detta konto" : "Visa konto"}
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

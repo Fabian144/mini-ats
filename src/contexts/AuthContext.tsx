@@ -15,12 +15,20 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  adminViewAccount: AdminViewAccount | null;
+  setAdminViewAccount: (account: AdminViewAccount | null) => void;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
   updatePassword: (password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<{ error: Error | null }>;
+}
+
+interface AdminViewAccount {
+  id: string;
+  email: string;
+  fullName: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminViewAccount, setAdminViewAccountState] = useState<AdminViewAccount | null>(null);
   const initialised = useRef(false);
 
   const checkAdminRole = useCallback(async (userId: string) => {
@@ -105,6 +114,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, [checkAdminRole]);
 
+  useEffect(() => {
+    if (!isAdmin) {
+      setAdminViewAccountState(null);
+      sessionStorage.removeItem("admin_view_account");
+      return;
+    }
+
+    const stored = sessionStorage.getItem("admin_view_account");
+    if (!stored) return;
+
+    try {
+      const parsed = JSON.parse(stored) as AdminViewAccount;
+      if (parsed?.id && parsed?.email) {
+        setAdminViewAccountState(parsed);
+      } else {
+        sessionStorage.removeItem("admin_view_account");
+      }
+    } catch {
+      sessionStorage.removeItem("admin_view_account");
+    }
+  }, [isAdmin]);
+
+  const setAdminViewAccount = useCallback((account: AdminViewAccount | null) => {
+    setAdminViewAccountState(account);
+    if (account) {
+      sessionStorage.setItem("admin_view_account", JSON.stringify(account));
+    } else {
+      sessionStorage.removeItem("admin_view_account");
+    }
+  }, []);
+
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -142,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user?.id) {
       sessionStorage.removeItem(`admin_role_${user.id}`);
     }
+    sessionStorage.removeItem("admin_view_account");
     await supabase.auth.signOut();
   };
 
@@ -156,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     sessionStorage.removeItem(`admin_role_${user.id}`);
+    sessionStorage.removeItem("admin_view_account");
     await supabase.auth.signOut();
     return { error: null };
   };
@@ -167,6 +209,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         loading,
         isAdmin,
+        adminViewAccount,
+        setAdminViewAccount,
         signUp,
         signIn,
         resetPassword,

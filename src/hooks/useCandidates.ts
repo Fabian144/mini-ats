@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import type { Database } from '@/integrations/supabase/types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
 
-type CandidateStatus = Database['public']['Enums']['candidate_status'];
+type CandidateStatus = Database["public"]["Enums"]["candidate_status"];
 
 export interface Candidate {
   id: string;
@@ -26,15 +26,17 @@ export interface Candidate {
 }
 
 export function useCandidates() {
-  const { user } = useAuth();
+  const { user, isAdmin, adminViewAccount } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const targetUserId = adminViewAccount?.id ?? user?.id;
+  const isAllAccountsView = isAdmin && !adminViewAccount;
 
   const candidatesQuery = useQuery({
-    queryKey: ['candidates', user?.id],
+    queryKey: ["candidates", isAllAccountsView ? "all" : targetUserId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('candidates')
+      let query = supabase
+        .from("candidates")
         .select(
           `
           id,
@@ -55,23 +57,31 @@ export function useCandidates() {
           )
         `,
         )
-        .order('created_at', { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(200);
+
+      if (!isAllAccountsView) {
+        query = query.eq("user_id", targetUserId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Candidate[];
     },
-    enabled: !!user,
+    enabled: isAllAccountsView ? isAdmin : !!targetUserId,
     staleTime: 1000 * 60 * 2,
+    refetchOnMount: "always",
   });
 
   const createCandidate = useMutation({
     mutationFn: async (
-      candidate: Omit<Candidate, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'jobs'>,
+      candidate: Omit<Candidate, "id" | "user_id" | "created_at" | "updated_at" | "jobs">,
     ) => {
+      if (!targetUserId) throw new Error("Missing target account for candidate creation");
       const { data, error } = await supabase
-        .from('candidates')
-        .insert({ ...candidate, user_id: user!.id })
+        .from("candidates")
+        .insert({ ...candidate, user_id: targetUserId! })
         .select()
         .single();
 
@@ -79,14 +89,14 @@ export function useCandidates() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
-      toast({ title: 'Kandidat tillagd!' });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
+      toast({ title: "Kandidat tillagd!" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte lägga till kandidat',
+        title: "Kunde inte lägga till kandidat",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
@@ -95,9 +105,9 @@ export function useCandidates() {
     mutationFn: async ({ id, ...updates }: Partial<Candidate> & { id: string }) => {
       const { jobs, ...cleanUpdates } = updates as any;
       const { data, error } = await supabase
-        .from('candidates')
+        .from("candidates")
         .update(cleanUpdates)
-        .eq('id', id)
+        .eq("id", id)
         .select()
         .single();
 
@@ -106,10 +116,10 @@ export function useCandidates() {
     },
     // Optimistic update: move the card instantly, revert on error
     onMutate: async (updated) => {
-      await queryClient.cancelQueries({ queryKey: ['candidates'] });
-      const previous = queryClient.getQueryData<Candidate[]>(['candidates', user?.id]);
+      await queryClient.cancelQueries({ queryKey: ["candidates"] });
+      const previous = queryClient.getQueryData<Candidate[]>(["candidates", targetUserId]);
       if (previous) {
-        queryClient.setQueryData<Candidate[]>(['candidates', user?.id], (old) =>
+        queryClient.setQueryData<Candidate[]>(["candidates", targetUserId], (old) =>
           (old ?? []).map((c) => (c.id === updated.id ? { ...c, ...updated } : c)),
         );
       }
@@ -117,33 +127,33 @@ export function useCandidates() {
     },
     onError: (error: Error, _vars, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['candidates', user?.id], context.previous);
+        queryClient.setQueryData(["candidates", targetUserId], context.previous);
       }
       toast({
-        title: 'Kunde inte uppdatera kandidat',
+        title: "Kunde inte uppdatera kandidat",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
     },
   });
 
   const deleteCandidate = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('candidates').delete().eq('id', id);
+      const { error } = await supabase.from("candidates").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['candidates'] });
-      toast({ title: 'Kandidat borttagen!' });
+      queryClient.invalidateQueries({ queryKey: ["candidates"] });
+      toast({ title: "Kandidat borttagen!" });
     },
     onError: (error: Error) => {
       toast({
-        title: 'Kunde inte ta bort kandidat',
+        title: "Kunde inte ta bort kandidat",
         description: error.message,
-        variant: 'destructive',
+        variant: "destructive",
       });
     },
   });
