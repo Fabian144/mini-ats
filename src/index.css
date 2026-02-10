@@ -112,7 +112,7 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family:
-      'Inter',
+      "Inter",
       system-ui,
       -apple-system,
       sans-serif;
@@ -168,9 +168,10 @@
   }
 
   .kanban-column {
-		height: 1.2em;
-		overflow: scroll;
-    @apply flex flex-col bg-muted/50 rounded-xl p-3 min-h-[500px];
+    height: auto;
+    overflow: auto;
+    min-height: clamp(520px, 70vh, 720px);
+    @apply flex flex-col bg-muted/50 rounded-xl p-3;
   }
 
   .kanban-card {

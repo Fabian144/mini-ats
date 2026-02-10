@@ -37,9 +37,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   const effectiveUserId = isAdmin && adminViewAccount?.id ? adminViewAccount.id : user?.id;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || "Alla konton";
   const userName =
-    profileName ||
-    (user?.user_metadata as { full_name?: string } | undefined)?.full_name ||
-    user?.email;
+    profileName || (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
 
   useEffect(() => {
     if (!user?.id) {
@@ -111,9 +109,9 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-64 bg-sidebar text-sidebar-foreground flex flex-col">
+      <aside className="w-full md:w-64 bg-sidebar text-sidebar-foreground flex flex-col">
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
