@@ -1,6 +1,6 @@
 # TalentTrack (Mini ATS) 👥
 
-TalentTrack is a lightweight, modern Applicant Tracking System (ATS) built with React, Vite, and Supabase. It provides a clean interface for managing job openings and tracking candidates through the hiring pipeline using a drag-and-drop Kanban board.
+A lightweight, modern Applicant Tracking System (ATS) built with React, Vite, and Supabase. It provides a clean interface for managing job openings and tracking candidates through the hiring pipeline using a drag-and-drop Kanban board.
 
 The application features an authentication system, role-based access control (Admin and Customer roles), and a responsive design that works across all devices.
 
