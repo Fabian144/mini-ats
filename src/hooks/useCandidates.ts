@@ -159,7 +159,10 @@ export function useCandidates() {
   });
 
   return {
-    candidates: candidatesQuery.data ?? [],
+    candidates:
+      !isAllAccountsView && targetUserId
+        ? (candidatesQuery.data ?? []).filter((candidate) => candidate.user_id === targetUserId)
+        : candidatesQuery.data ?? [],
     isLoading: candidatesQuery.isLoading,
     createCandidate,
     updateCandidate,

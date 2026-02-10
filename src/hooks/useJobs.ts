@@ -92,6 +92,12 @@ export function useJobs() {
 
   const deleteJob = useMutation({
     mutationFn: async (id: string) => {
+      const { error: candidatesError } = await supabase
+        .from("candidates")
+        .delete()
+        .eq("job_id", id);
+      if (candidatesError) throw candidatesError;
+
       const { error } = await supabase.from("jobs").delete().eq("id", id);
       if (error) throw error;
     },
@@ -110,7 +116,10 @@ export function useJobs() {
   });
 
   return {
-    jobs: jobsQuery.data ?? [],
+    jobs:
+      !isAllAccountsView && targetUserId
+        ? (jobsQuery.data ?? []).filter((job) => job.user_id === targetUserId)
+        : jobsQuery.data ?? [],
     isLoading: jobsQuery.isLoading,
     createJob,
     updateJob,
