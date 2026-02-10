@@ -168,7 +168,7 @@
   }
 
   .kanban-column {
-		height: 1em;
+		height: 1.2em;
 		overflow: scroll;
     @apply flex flex-col bg-muted/50 rounded-xl p-3 min-h-[500px];
   }
