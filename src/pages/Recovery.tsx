@@ -42,7 +42,7 @@ export default function Recovery() {
           </div>
 
           <Card className="glass-card">
-            <CardHeader className="text-center pb-2">
+            <CardHeader className="text-center pb-4">
               <CardTitle>Redan inloggad</CardTitle>
               <CardDescription>
                 Du måste vara utloggad för att kunna återställa lösenordet.
