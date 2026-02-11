@@ -9,7 +9,6 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -28,16 +27,33 @@ const navItems = [
   { href: "/candidates", icon: Users, label: "Kandidater" },
 ];
 
+const getCachedProfileName = (userId?: string) => {
+  if (!userId) return null;
+  return sessionStorage.getItem(`profile-name:${userId}`);
+};
+
+const setCachedProfileName = (userId: string, name: string | null) => {
+  const key = `profile-name:${userId}`;
+  if (name) {
+    sessionStorage.setItem(key, name);
+  } else {
+    sessionStorage.removeItem(key);
+  }
+};
+
 const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, signOut, isAdmin, adminViewAccount } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [profileName, setProfileName] = useState<string | null>(null);
+  const metadataName =
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name ?? null;
+  const [profileName, setProfileName] = useState<string | null>(
+    getCachedProfileName(user?.id) ?? metadataName,
+  );
   const effectiveUserId = isAdmin && adminViewAccount?.id ? adminViewAccount.id : user?.id;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || "Alla konton";
-  const userName =
-    profileName || (user?.user_metadata as { full_name?: string } | undefined)?.full_name;
+  const userName = profileName || metadataName;
 
   useEffect(() => {
     if (!user?.id) {
@@ -47,6 +63,8 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
 
     let isActive = true;
 
+    setProfileName((current) => current ?? getCachedProfileName(user.id) ?? metadataName);
+
     supabase
       .from("profiles")
       .select("full_name")
@@ -55,16 +73,17 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
       .then(({ data, error }) => {
         if (!isActive) return;
         if (error) {
-          setProfileName(null);
           return;
         }
-        setProfileName(data?.full_name ?? null);
+        const nextName = data?.full_name ?? null;
+        setProfileName(nextName);
+        setCachedProfileName(user.id, nextName);
       });
 
     return () => {
       isActive = false;
     };
-  }, [user?.id]);
+  }, [user?.id, metadataName]);
 
   // Prefetch both candidates and jobs as soon as the layout mounts
   // so navigating between Dashboard/Jobs/Candidates is instant
