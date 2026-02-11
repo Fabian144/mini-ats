@@ -152,7 +152,7 @@ export default function Jobs() {
                 Lägg till jobb
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>{editingJob ? "Redigera jobb" : "Lägg till jobb"}</DialogTitle>
               </DialogHeader>
