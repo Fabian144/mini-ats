@@ -43,7 +43,7 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 interface UserWithRole {
   id: string;
   email: string;
-  full_name: string | null;
+  display_name: string | null;
   role: AppRole;
 }
 
@@ -63,14 +63,20 @@ export default function Admin() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
-      // Single query: fetch profiles with their roles via a parallel Promise.all
-      const [profilesRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("user_id, email, full_name"),
+      // Fetch users from auth + roles in parallel
+      const [usersRes, rolesRes] = await Promise.all([
+        supabase.rpc("admin_list_users"),
         supabase.from("user_roles").select("user_id, role"),
       ]);
 
-      if (profilesRes.error) throw profilesRes.error;
-      if (rolesRes.error) throw rolesRes.error;
+      if (usersRes.error) {
+        console.error("admin_list_users error:", usersRes.error);
+        throw usersRes.error;
+      }
+      if (rolesRes.error) {
+        console.error("user_roles error:", rolesRes.error);
+        throw rolesRes.error;
+      }
 
       // Build a lookup map for O(1) role resolution instead of O(n) .find()
       const roleMap = new Map<string, AppRole>();
@@ -78,11 +84,11 @@ export default function Admin() {
         roleMap.set(r.user_id, r.role);
       }
 
-      return profilesRes.data.map((profile) => ({
-        id: profile.user_id,
-        email: profile.email,
-        full_name: profile.full_name,
-        role: roleMap.get(profile.user_id) ?? "customer",
+      return usersRes.data.map((user) => ({
+        id: user.id,
+        email: user.email,
+        display_name: user.display_name,
+        role: roleMap.get(user.id) ?? "customer",
       })) as UserWithRole[];
     },
     staleTime: 1000 * 60 * 2,
@@ -95,7 +101,7 @@ export default function Admin() {
         email,
         password,
         options: {
-          data: { full_name: fullName, role },
+          data: { display_name: fullName, role },
         },
       });
 
@@ -270,124 +276,126 @@ export default function Admin() {
             </CardContent>
           </Card>
         ) : (
-          <div className={`w-full ${sortedUsers.length === 2 ? "max-w-[1100px]" : sortedUsers.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}>
+          <div
+            className={`w-full ${sortedUsers.length === 2 ? "max-w-[1100px]" : sortedUsers.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}
+          >
             <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
               {sortedUsers.map((user) => (
                 <Card key={user.id} className="w-full min-w-0">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        {user.role === "admin" ? (
-                          <Shield className="w-5 h-5 text-primary" />
-                        ) : (
-                          <User className="w-5 h-5 text-primary" />
-                        )}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          {user.role === "admin" ? (
+                            <Shield className="w-5 h-5 text-primary" />
+                          ) : (
+                            <User className="w-5 h-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base truncate">
+                            {user.display_name || "Namnlös"}
+                            {user.id === currentUser?.id ? " (Du)" : ""}
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base truncate">
-                          {user.full_name || "Namnlös"}
-                          {user.id === currentUser?.id ? " (Du)" : ""}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                      </div>
+                      {isAdmin ? (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              className="whitespace-nowrap"
+                              disabled={
+                                (deleteUser.isPending && deletingUserId === user.id) ||
+                                (user.role === "admin" && adminCount === 1)
+                              }
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Ta bort konto?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Detta tar bort kontot och all tillhörande data. Åtgärden går inte
+                                att ångra.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel asChild>
+                                <Button type="button" variant="outline">
+                                  Avbryt
+                                </Button>
+                              </AlertDialogCancel>
+                              <AlertDialogAction asChild>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => deleteUser.mutate(user.id)}
+                                >
+                                  Ta bort
+                                </Button>
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : null}
                     </div>
-                    {isAdmin ? (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="destructive"
-                            className="whitespace-nowrap"
-                            disabled={
-                              (deleteUser.isPending && deletingUserId === user.id) ||
-                              (user.role === "admin" && adminCount === 1)
-                            }
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Ta bort konto?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Detta tar bort kontot och all tillhörande data. Åtgärden går inte att
-                              ångra.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel asChild>
-                              <Button type="button" variant="outline">
-                                Avbryt
-                              </Button>
-                            </AlertDialogCancel>
-                            <AlertDialogAction asChild>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => deleteUser.mutate(user.id)}
-                              >
-                                Ta bort
-                              </Button>
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    ) : null}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Badge
-                      variant={user.role === "admin" ? "default" : "secondary"}
-                      className="pointer-events-none"
-                    >
-                      {user.role === "admin" ? "Admin" : "Kund"}
-                    </Badge>
-                    {user.role === "admin" && isAdmin && (
-                      <Button
-                        type="button"
-                        variant={
-                          user.id === currentUser?.id && !adminViewAccount ? "default" : "outline"
-                        }
-                        size="sm"
-                        className="w-full justify-between"
-                        disabled={user.id !== currentUser?.id}
-                        onClick={() => {
-                          if (user.id !== currentUser?.id) return;
-                          setAdminViewAccount(null);
-                        }}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Badge
+                        variant={user.role === "admin" ? "default" : "secondary"}
+                        className="pointer-events-none"
                       >
-                        {user.id !== currentUser?.id
-                          ? "Visa konto"
-                          : user.id === currentUser?.id && !adminViewAccount
-                            ? "Visar alla konton"
-                            : "Visa alla konton"}
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {user.role === "customer" && isAdmin && (
-                      <Button
-                        type="button"
-                        variant={adminViewAccount?.id === user.id ? "default" : "outline"}
-                        size="sm"
-                        className="w-full justify-between"
-                        onClick={() => {
-                          setAdminViewAccount({
-                            id: user.id,
-                            email: user.email,
-                            fullName: user.full_name,
-                          });
-                        }}
-                      >
-                        {adminViewAccount?.id === user.id ? "Visar detta konto" : "Visa konto"}
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                        {user.role === "admin" ? "Admin" : "Kund"}
+                      </Badge>
+                      {user.role === "admin" && isAdmin && (
+                        <Button
+                          type="button"
+                          variant={
+                            user.id === currentUser?.id && !adminViewAccount ? "default" : "outline"
+                          }
+                          size="sm"
+                          className="w-full justify-between"
+                          disabled={user.id !== currentUser?.id}
+                          onClick={() => {
+                            if (user.id !== currentUser?.id) return;
+                            setAdminViewAccount(null);
+                          }}
+                        >
+                          {user.id !== currentUser?.id
+                            ? "Visa konto"
+                            : user.id === currentUser?.id && !adminViewAccount
+                              ? "Visar alla konton"
+                              : "Visa alla konton"}
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {user.role === "customer" && isAdmin && (
+                        <Button
+                          type="button"
+                          variant={adminViewAccount?.id === user.id ? "default" : "outline"}
+                          size="sm"
+                          className="w-full justify-between"
+                          onClick={() => {
+                            setAdminViewAccount({
+                              id: user.id,
+                              email: user.email,
+                              fullName: user.display_name,
+                            });
+                          }}
+                        >
+                          {adminViewAccount?.id === user.id ? "Visar detta konto" : "Visa konto"}
+                          <ArrowRight className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
