@@ -53,7 +53,7 @@ export default function Recovery() {
                 className="w-full"
                 onClick={async () => {
                   await signOut();
-                  navigate("/recovery", { replace: true });
+                  navigate("/auth", { replace: true });
                 }}
               >
                 Logga ut och försök igen
