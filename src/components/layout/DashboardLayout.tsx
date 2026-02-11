@@ -76,6 +76,21 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
     });
   }, [isIdentityDialogOpen, userName, profileEmail]);
 
+  // Refresh session when page visibility changes (e.g., user confirms email in another tab)
+  // This ensures email updates are reflected after email confirmation
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        supabase.auth.refreshSession().catch(() => {
+          // Silently fail if refresh fails
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
   // Prefetch both candidates and jobs as soon as the layout mounts
   // so navigating between Dashboard/Jobs/Candidates is instant
   useEffect(() => {
@@ -154,6 +169,10 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
         );
 
         if (authError) throw authError;
+
+        // Refresh session to sync updated user data (display_name updates immediately,
+        // email will show new value once confirmed via email link)
+        await supabase.auth.refreshSession();
       }
 
       if (nameChanged) {
@@ -168,7 +187,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
         title: "Uppdaterat!",
         description: emailChanged
           ? "E-postbytet kräver bekräftelse via både den gamla och nya adressen."
-          : "Din profil har uppdaterats.",
+          : "Dina profiluppgifter har uppdaterats.",
       });
       setIsIdentityDialogOpen(false);
     } catch (err) {
