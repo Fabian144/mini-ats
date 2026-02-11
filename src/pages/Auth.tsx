@@ -77,7 +77,7 @@ export default function Auth() {
     if (!email.trim()) {
       toast({
         title: "Ange din e-post",
-        description: "Fyll i e-postadressen för att återställa lösenordet.",
+        description: "Fyll i din e-postadress för att återställa lösenordet.",
         variant: "destructive",
       });
       return;
