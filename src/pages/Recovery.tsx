@@ -17,6 +17,18 @@ export default function Recovery() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const historyCount = Number.parseInt(sessionStorage.getItem("route_history_count") ?? "1", 10);
+  const url = new URL(window.location.href);
+  const searchParams = url.searchParams;
+  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const hasErrorParam =
+    searchParams.has("error") ||
+    searchParams.has("error_code") ||
+    searchParams.has("error_description") ||
+    hashParams.has("error") ||
+    hashParams.has("error_code") ||
+    hashParams.has("error_description");
+
   useEffect(() => {
     supabase.auth.getSession();
   }, []);
@@ -29,37 +41,21 @@ export default function Recovery() {
     );
   }
 
-  if (user) {
+  if (Number.isNaN(historyCount) || historyCount > 1 || hasErrorParam) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md animate-fade-in">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-              <Users className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold text-foreground">TalentTrack</h1>
-            <p className="text-muted-foreground mt-2">Ditt smarta rekryteringsverktyg</p>
-          </div>
-
           <Card className="glass-card">
-            <CardHeader className="text-center pb-4">
-              <CardTitle>Redan inloggad</CardTitle>
+            <CardHeader className="text-center pb-2">
+              <CardTitle>Ogiltig återställningslänk</CardTitle>
               <CardDescription>
-                Du måste vara utloggad för att kunna återställa lösenordet.
+                Länken verkar vara för gammal eller redan använd. Be om en ny återställningslänk och
+                prova igen.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Button
-                className="w-full"
-                onClick={async () => {
-                  await signOut();
-                  navigate("/auth", { replace: true });
-                }}
-              >
-                Logga ut och försök igen
-              </Button>
-              <Button className="w-full" onClick={() => navigate("/dashboard")}>
-                Tillbaka till startsidan
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/auth")}>
+                Tillbaka till inloggning
               </Button>
             </CardContent>
           </Card>
@@ -176,7 +172,10 @@ export default function Recovery() {
                 type="button"
                 variant="link"
                 className="px-0"
-                onClick={() => navigate("/auth")}
+                onClick={async () => {
+                  await signOut();
+                  navigate("/auth");
+                }}
               >
                 Tillbaka till inloggning
               </Button>

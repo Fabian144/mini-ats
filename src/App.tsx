@@ -1,9 +1,9 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useRef } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -27,10 +27,30 @@ const queryClient = new QueryClient({
   },
 });
 
+const RouteHistoryTracker = () => {
+  const location = useLocation();
+  const previousPath = useRef<string>("");
+
+  useEffect(() => {
+    if (previousPath.current !== location.pathname) {
+      const rawCount = sessionStorage.getItem("route_history_count");
+      const currentCount = rawCount ? Number.parseInt(rawCount, 10) : 0;
+      const nextCount = Number.isNaN(currentCount) ? 1 : currentCount + 1;
+
+      sessionStorage.setItem("route_history_count", String(nextCount));
+      sessionStorage.setItem("last_route", location.pathname);
+      previousPath.current = location.pathname;
+    }
+  }, [location.pathname]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <RouteHistoryTracker />
         <AuthProvider>
           <Suspense
             fallback={
