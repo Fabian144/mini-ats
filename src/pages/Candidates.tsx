@@ -265,104 +265,108 @@ export default function Candidates() {
             </CardContent>
           </Card>
         ) : (
-          <div className="w-full max-w-[1900px]">
+          <div
+            className={`w-full ${candidates.length === 2 ? "max-w-[1100px]" : candidates.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}
+          >
             <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
               {candidates.map((candidate) => {
-              const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
+                const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
 
-              return (
-                <Card key={candidate.id} className="w-full min-w-0">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground">{candidate.name}</h3>
-                        {candidate.jobs && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                            <Briefcase className="w-3 h-3" />
-                            <span>{candidate.jobs.title}</span>
+                return (
+                  <Card key={candidate.id} className="w-full min-w-0">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">
+                            {candidate.name}
+                          </h3>
+                          {candidate.jobs && (
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                              <Briefcase className="w-3 h-3" />
+                              <span>{candidate.jobs.title}</span>
+                            </div>
+                          )}
+                        </div>
+                        <span className={`status-badge status-${candidate.status}`}>
+                          {statusLabels[candidate.status]}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4" />
+                          <span className="truncate">
+                            {candidate.email || "Ingen e-post angiven"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4" />
+                          <span>{candidate.phone || "Inget telefonnummer angivet"}</span>
+                        </div>
+                        {safeLinkedinUrl ? (
+                          <a
+                            href={safeLinkedinUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-primary hover:underline"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                            <span>LinkedIn-profil</span>
+                          </a>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Linkedin className="w-4 h-4" />
+                            <span>Ingen LinkedIn-profil angiven</span>
                           </div>
                         )}
                       </div>
-                      <span className={`status-badge status-${candidate.status}`}>
-                        {statusLabels[candidate.status]}
-                      </span>
-                    </div>
 
-                    <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
-                        <span className="truncate">
-                          {candidate.email || "Ingen e-post angiven"}
-                        </span>
+                      <div className="flex gap-1 pt-3 border-t border-border">
+                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(candidate)}>
+                          <Edit className="w-4 h-4 mr-1" />
+                          Redigera
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Ta bort
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Ta bort kandidat?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Detta tar bort kandidaten permanent. Åtgarden går inte att ångra.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel asChild>
+                                <Button type="button" variant="outline">
+                                  Avbryt
+                                </Button>
+                              </AlertDialogCancel>
+                              <AlertDialogAction asChild>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => deleteCandidate.mutate(candidate.id)}
+                                >
+                                  Ta bort
+                                </Button>
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
-                        <span>{candidate.phone || "Inget telefonnummer angivet"}</span>
-                      </div>
-                      {safeLinkedinUrl ? (
-                        <a
-                          href={safeLinkedinUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-primary hover:underline"
-                        >
-                          <Linkedin className="w-4 h-4" />
-                          <span>LinkedIn-profil</span>
-                        </a>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <Linkedin className="w-4 h-4" />
-                          <span>Ingen LinkedIn-profil angiven</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-1 pt-3 border-t border-border">
-                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(candidate)}>
-                        <Edit className="w-4 h-4 mr-1" />
-                        Redigera
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Ta bort
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Ta bort kandidat?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Detta tar bort kandidaten permanent. Åtgarden går inte att ångra.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel asChild>
-                              <Button type="button" variant="outline">
-                                Avbryt
-                              </Button>
-                            </AlertDialogCancel>
-                            <AlertDialogAction asChild>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => deleteCandidate.mutate(candidate.id)}
-                              >
-                                Ta bort
-                              </Button>
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         )}

@@ -286,7 +286,7 @@ export default function Jobs() {
             </CardContent>
           </Card>
         ) : (
-          <div className="w-full max-w-[1900px]">
+          <div className={`w-full ${jobs.length === 2 ? "max-w-[1100px]" : jobs.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}>
             <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
               {jobs.map((job) => (
                 <Card key={job.id} className="w-full min-w-0">
