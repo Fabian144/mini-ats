@@ -28,6 +28,14 @@ const KanbanCard = memo(function KanbanCard({
     e.dataTransfer.setData("candidateId", candidate.id);
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    onTouchDragMove(e.clientX);
+  };
+
+  const handleDragEnd = () => {
+    onTouchDragEnd();
+  };
+
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement | null;
     ignoreTouchRef.current = !!target?.closest("a");
@@ -135,6 +143,8 @@ const KanbanCard = memo(function KanbanCard({
       ref={cardRef}
       draggable
       onDragStart={handleDragStart}
+      onDrag={handleDrag}
+      onDragEnd={handleDragEnd}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

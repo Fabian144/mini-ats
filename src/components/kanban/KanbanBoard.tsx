@@ -89,7 +89,7 @@ export default function KanbanBoard() {
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
-      const edge = 56;
+      const edge = 96;
       let velocity = 0;
 
       if (clientX < rect.left + edge) {

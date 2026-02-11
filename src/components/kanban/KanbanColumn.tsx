@@ -35,6 +35,7 @@ const KanbanColumn = memo(function KanbanColumn({
 }: KanbanColumnProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    onTouchDragMove(e.clientX);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -43,6 +44,7 @@ const KanbanColumn = memo(function KanbanColumn({
     if (candidateId) {
       onStatusChange(candidateId, status);
     }
+    onTouchDragEnd();
   };
 
   return (
