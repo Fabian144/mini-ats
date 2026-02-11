@@ -1,24 +1,27 @@
-import { memo } from 'react';
-import { Candidate } from '@/hooks/useCandidates';
-import KanbanCard from './KanbanCard';
-import type { Database } from '@/integrations/supabase/types';
+import { memo } from "react";
+import { Candidate } from "@/hooks/useCandidates";
+import KanbanCard from "./KanbanCard";
+import type { Database } from "@/integrations/supabase/types";
 
-type CandidateStatus = Database['public']['Enums']['candidate_status'];
+type CandidateStatus = Database["public"]["Enums"]["candidate_status"];
 
 interface KanbanColumnProps {
   status: CandidateStatus;
   label: string;
   candidates: Candidate[];
   onStatusChange: (candidateId: string, newStatus: CandidateStatus) => void;
+  onTouchDrop: (candidate: Candidate, clientX: number, clientY: number) => void;
+  onTouchDragMove: (clientX: number) => void;
+  onTouchDragEnd: () => void;
 }
 
 const statusColors: Record<CandidateStatus, string> = {
-  new: 'bg-status-new',
-  screening: 'bg-status-screening',
-  interview: 'bg-status-interview',
-  offer: 'bg-status-offer',
-  hired: 'bg-status-hired',
-  rejected: 'bg-status-rejected',
+  new: "bg-status-new",
+  screening: "bg-status-screening",
+  interview: "bg-status-interview",
+  offer: "bg-status-offer",
+  hired: "bg-status-hired",
+  rejected: "bg-status-rejected",
 };
 
 const KanbanColumn = memo(function KanbanColumn({
@@ -26,6 +29,9 @@ const KanbanColumn = memo(function KanbanColumn({
   label,
   candidates,
   onStatusChange,
+  onTouchDrop,
+  onTouchDragMove,
+  onTouchDragEnd,
 }: KanbanColumnProps) {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -33,7 +39,7 @@ const KanbanColumn = memo(function KanbanColumn({
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const candidateId = e.dataTransfer.getData('candidateId');
+    const candidateId = e.dataTransfer.getData("candidateId");
     if (candidateId) {
       onStatusChange(candidateId, status);
     }
@@ -42,6 +48,7 @@ const KanbanColumn = memo(function KanbanColumn({
   return (
     <div
       className="kanban-column w-72 flex-shrink-0"
+      data-kanban-status={status}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
     >
@@ -55,7 +62,13 @@ const KanbanColumn = memo(function KanbanColumn({
 
       <div className="space-y-3">
         {candidates.map((candidate) => (
-          <KanbanCard key={candidate.id} candidate={candidate} />
+          <KanbanCard
+            key={candidate.id}
+            candidate={candidate}
+            onTouchDrop={onTouchDrop}
+            onTouchDragMove={onTouchDragMove}
+            onTouchDragEnd={onTouchDragEnd}
+          />
         ))}
         {candidates.length === 0 && (
           <div className="text-center py-8 text-muted-foreground text-sm">Inga kandidater</div>
