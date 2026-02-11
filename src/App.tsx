@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 const Auth = lazy(() => import("./pages/Auth"));
 const Recovery = lazy(() => import("./pages/Recovery"));
+const EmailConfirmed = lazy(() => import("./pages/EmailConfirmed"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Jobs = lazy(() => import("./pages/Jobs"));
 const Candidates = lazy(() => import("./pages/Candidates"));
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/recovery" element={<Recovery />} />
+              <Route path="/email-confirmed" element={<EmailConfirmed />} />
               <Route
                 path="/dashboard"
                 element={

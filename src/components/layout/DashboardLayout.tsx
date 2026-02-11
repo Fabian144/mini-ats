@@ -165,7 +165,9 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
 
         const { error: authError } = await supabase.auth.updateUser(
           authUpdates,
-          emailChanged ? { emailRedirectTo: window.location.origin } : undefined,
+          emailChanged
+            ? { emailRedirectTo: `${window.location.origin}/mini-ats/email-confirmed` }
+            : undefined,
         );
 
         if (authError) throw authError;
