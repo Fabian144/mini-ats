@@ -13,13 +13,51 @@ export default function Recovery() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
-  const { updatePassword } = useAuth();
+  const { updatePassword, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse text-muted-foreground">Laddar...</div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md animate-fade-in">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
+              <Users className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">TalentTrack</h1>
+            <p className="text-muted-foreground mt-2">Ditt smarta rekryteringsverktyg</p>
+          </div>
+
+          <Card className="glass-card">
+            <CardHeader className="text-center pb-2">
+              <CardTitle>Redan inloggad</CardTitle>
+              <CardDescription>
+                Du måste vara utloggad för att kunna återställa lösenordet.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button className="w-full" onClick={() => navigate("/dashboard")}>
+                Tillbaka till startsidan
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const clearRecoveryUrl = () => {
     const url = new URL(window.location.href);
