@@ -130,6 +130,7 @@ export default function Jobs() {
 
   const isAllAccountsView = isAdmin && !adminViewAccount;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || user?.email;
+  const showAccountLabel = isAdmin && Boolean(accountLabel);
   const isJobFormValid =
     formData.title.trim().length > 0 &&
     formData.company.trim().length > 0 &&
@@ -156,7 +157,7 @@ export default function Jobs() {
               <DialogHeader>
                 <DialogTitle>{editingJob ? "Redigera jobb" : "Lägg till jobb"}</DialogTitle>
               </DialogHeader>
-              {accountLabel && (
+              {showAccountLabel && (
                 <p className="text-m text-muted-foreground">
                   {editingJob ? "Redigeras för konto: " : "Skapas för konto: "}
                   <span className="font-medium">{accountLabel}</span>
@@ -286,96 +287,98 @@ export default function Jobs() {
             </CardContent>
           </Card>
         ) : (
-          <div className={`w-full ${jobs.length === 2 ? "max-w-[1100px]" : jobs.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}>
+          <div
+            className={`w-full ${jobs.length === 2 ? "max-w-[1100px]" : jobs.length === 1 ? "max-w-[550px]" : "max-w-[1900px]"}`}
+          >
             <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
               {jobs.map((job) => (
                 <Card key={job.id} className="w-full min-w-0">
-                <CardHeader className="pb-0">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg">{job.title}</CardTitle>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(job)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Ta bort jobb?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Detta tar bort jobbet och alla kopplade kandidater. Åtgarden går inte
-                              att ångra.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel asChild>
-                              <Button type="button" variant="outline">
-                                Avbryt
-                              </Button>
-                            </AlertDialogCancel>
-                            <AlertDialogAction asChild>
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                onClick={() => deleteJob.mutate(job.id)}
-                              >
-                                Ta bort
-                              </Button>
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    {job.company && (
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4" />
-                        <span>{job.company}</span>
+                  <CardHeader className="pb-0">
+                    <div className="flex items-start justify-between">
+                      <CardTitle className="text-lg">{job.title}</CardTitle>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(job)}>
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Ta bort jobb?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Detta tar bort jobbet och alla kopplade kandidater. Åtgarden går
+                                inte att ångra.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel asChild>
+                                <Button type="button" variant="outline">
+                                  Avbryt
+                                </Button>
+                              </AlertDialogCancel>
+                              <AlertDialogAction asChild>
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  onClick={() => deleteJob.mutate(job.id)}
+                                >
+                                  Ta bort
+                                </Button>
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
-                    )}
-                    {job.location && (
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      {job.company && (
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4" />
+                          <span>{job.company}</span>
+                        </div>
+                      )}
+                      {job.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>{job.location}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>{job.location}</span>
+                        <span>
+                          {job.employment_type
+                            ? `Anställningsform: ${job.employment_type}`
+                            : "Anställningsform: Ej angiven"}
+                        </span>
                       </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <span>
-                        {job.employment_type
-                          ? `Anställningsform: ${job.employment_type}`
-                          : "Anställningsform: Ej angiven"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span>
+                          {job.salary_amount
+                            ? `Lön: ${Number(job.salary_amount).toLocaleString("sv-SE")} kr`
+                            : "Lön: Ej angiven"}
+                          {job.salary_amount &&
+                            (job.salary_unit === "hourly"
+                              ? " / tim"
+                              : job.salary_unit === "monthly"
+                                ? " / mån"
+                                : "")}
+                        </span>
+                      </div>
+                      <p className="line-clamp-2 pt-2 border-t border-border mt-3">
+                        {job.description || "Ingen beskrivning angiven"}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span>
-                        {job.salary_amount
-                          ? `Lön: ${Number(job.salary_amount).toLocaleString("sv-SE")} kr`
-                          : "Lön: Ej angiven"}
-                        {job.salary_amount &&
-                          (job.salary_unit === "hourly"
-                            ? " / tim"
-                            : job.salary_unit === "monthly"
-                              ? " / mån"
-                              : "")}
-                      </span>
-                    </div>
-                    <p className="line-clamp-2 pt-2 border-t border-border mt-3">
-                      {job.description || "Ingen beskrivning angiven"}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>

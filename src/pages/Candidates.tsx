@@ -107,6 +107,7 @@ export default function Candidates() {
 
   const isAllAccountsView = isAdmin && !adminViewAccount;
   const accountLabel = adminViewAccount?.fullName || adminViewAccount?.email || user?.email;
+  const showAccountLabel = isAdmin && Boolean(accountLabel);
   const isCandidateFormValid = formData.name.trim().length > 0 && formData.job_id.length > 0;
 
   return (
@@ -130,7 +131,7 @@ export default function Candidates() {
                   {editingCandidate ? "Redigera kandidat" : "Lägg till kandidat"}
                 </DialogTitle>
               </DialogHeader>
-              {accountLabel && (
+              {showAccountLabel && (
                 <p className="text-m text-muted-foreground">
                   {editingCandidate ? "Redigeras för konto: " : "Skapas för konto: "}
                   <span className="font-medium">{accountLabel}</span>
