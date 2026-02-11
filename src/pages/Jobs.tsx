@@ -157,8 +157,8 @@ export default function Jobs() {
                 <DialogTitle>{editingJob ? "Redigera jobb" : "Lägg till jobb"}</DialogTitle>
               </DialogHeader>
               {accountLabel && (
-                <p className="text-xs text-muted-foreground">
-                  {editingJob ? "Redigeras för konto" : "Skapas för konto"}
+                <p className="text-m text-muted-foreground">
+                  {editingJob ? "Redigeras för konto: " : "Skapas för konto: "}
                   <span className="font-medium">{accountLabel}</span>
                 </p>
               )}

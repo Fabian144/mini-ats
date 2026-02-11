@@ -267,7 +267,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
         <div className="p-4 border-t border-sidebar-border">
           <button
             type="button"
-            className="flex w-full items-center gap-3 px-4 py-2 mb-2 rounded-md text-left transition-colors hover:bg-sidebar-accent/50"
+            className="flex w-full items-center gap-3 px-4 py-2 mb-2 rounded-md text-left bg-blue-500/10 transition-colors hover:bg-blue-500/20"
             onClick={() => setIsIdentityDialogOpen(true)}
           >
             <div className="w-8 h-8 rounded-full bg-sidebar-accent flex items-center justify-center">
@@ -348,7 +348,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
                 placeholder="namn@foretag.se"
               />
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <div className="flex gap-2 justify-end">
               <Button
                 type="button"
                 variant="outline"

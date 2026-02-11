@@ -131,8 +131,8 @@ export default function Candidates() {
                 </DialogTitle>
               </DialogHeader>
               {accountLabel && (
-                <p className="text-xs text-muted-foreground">
-                  {editingCandidate ? "Redigeras för konto" : "Skapas för konto"}
+                <p className="text-m text-muted-foreground">
+                  {editingCandidate ? "Redigeras för konto: " : "Skapas för konto: "}
                   <span className="font-medium">{accountLabel}</span>
                 </p>
               )}

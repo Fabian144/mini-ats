@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Users, Shield, User, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Users, Shield, User, Trash2, ArrowRight, Edit } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -52,6 +52,9 @@ export default function Admin() {
   const { user: currentUser, isAdmin, signOut, adminViewAccount, setAdminViewAccount } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editUser, setEditUser] = useState<UserWithRole | null>(null);
+  const [editForm, setEditForm] = useState({ fullName: "", email: "" });
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({
     email: "",
@@ -125,6 +128,41 @@ export default function Admin() {
     },
   });
 
+  const updateCustomerIdentity = useMutation({
+    mutationFn: async ({
+      userId,
+      email,
+      fullName,
+    }: {
+      userId: string;
+      email: string;
+      fullName: string;
+    }) => {
+      const nextEmail = email.trim() || null;
+      const nextName = fullName.trim() || null;
+      const { error } = await supabase.rpc("admin_update_customer_identity", {
+        _user_id: userId,
+        _email: nextEmail,
+        _display_name: nextName,
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast({ title: "Kontot uppdaterat." });
+      setIsEditOpen(false);
+      setEditUser(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Kunde inte uppdatera konto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
       const isSelf = currentUser?.id === userId;
@@ -161,6 +199,28 @@ export default function Admin() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createUser.mutate(newUser);
+  };
+
+  const handleEditSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!editUser) return;
+
+    const nextName = editForm.fullName.trim();
+    const nextEmail = editForm.email.trim();
+    const nameChanged = nextName !== (editUser.display_name ?? "");
+    const emailChanged = nextEmail !== editUser.email;
+
+    if (!nameChanged && !emailChanged) {
+      setIsEditOpen(false);
+      setEditUser(null);
+      return;
+    }
+
+    updateCustomerIdentity.mutate({
+      userId: editUser.id,
+      email: nextEmail,
+      fullName: nextName,
+    });
   };
 
   const sortedUsers = [...users].sort((a, b) => {
@@ -301,47 +361,66 @@ export default function Admin() {
                         </div>
                       </div>
                       {isAdmin ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
+                        <div className="flex gap-1">
+                          {user.role === "customer" ? (
                             <Button
                               type="button"
-                              size="sm"
-                              variant="destructive"
-                              className="whitespace-nowrap"
-                              disabled={
-                                (deleteUser.isPending && deletingUserId === user.id) ||
-                                (user.role === "admin" && adminCount === 1)
-                              }
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditUser(user);
+                                setEditForm({
+                                  fullName: user.display_name ?? "",
+                                  email: user.email,
+                                });
+                                setIsEditOpen(true);
+                              }}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Edit className="w-4 h-4" />
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Ta bort konto?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Detta tar bort kontot och all tillhörande data. Åtgärden går inte
-                                att ångra.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel asChild>
-                                <Button type="button" variant="outline">
-                                  Avbryt
-                                </Button>
-                              </AlertDialogCancel>
-                              <AlertDialogAction asChild>
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  onClick={() => deleteUser.mutate(user.id)}
-                                >
-                                  Ta bort
-                                </Button>
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                          ) : null}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                disabled={
+                                  (deleteUser.isPending && deletingUserId === user.id) ||
+                                  (user.role === "admin" && adminCount === 1)
+                                }
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Ta bort konto?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Detta tar bort kontot och all tillhörande data. Åtgärden går inte
+                                  att ångra.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel asChild>
+                                  <Button type="button" variant="outline">
+                                    Avbryt
+                                  </Button>
+                                </AlertDialogCancel>
+                                <AlertDialogAction asChild>
+                                  <Button
+                                    type="button"
+                                    variant="destructive"
+                                    onClick={() => deleteUser.mutate(user.id)}
+                                  >
+                                    Ta bort
+                                  </Button>
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       ) : null}
                     </div>
                   </CardHeader>
@@ -401,6 +480,44 @@ export default function Admin() {
           </div>
         )}
       </div>
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Redigera kundkonto</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-full-name">Fullständigt namn</Label>
+              <Input
+                id="edit-full-name"
+                value={editForm.fullName}
+                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                placeholder="Anna Andersson"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">E-post</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                placeholder="anna@email.se"
+                required
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
+                Avbryt
+              </Button>
+              <Button type="submit" disabled={updateCustomerIdentity.isPending}>
+                {updateCustomerIdentity.isPending ? "Sparar..." : "Spara"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
