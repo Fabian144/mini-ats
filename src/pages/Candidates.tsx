@@ -265,8 +265,9 @@ export default function Candidates() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,25em),1fr))]">
-            {candidates.map((candidate) => {
+          <div className="w-full max-w-[1900px]">
+            <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
+              {candidates.map((candidate) => {
               const safeLinkedinUrl = safeExternalUrl(candidate.linkedin_url);
 
               return (
@@ -362,6 +363,7 @@ export default function Candidates() {
                 </Card>
               );
             })}
+            </div>
           </div>
         )}
       </div>

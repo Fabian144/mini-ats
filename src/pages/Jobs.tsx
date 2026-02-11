@@ -286,9 +286,10 @@ export default function Jobs() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,25em),1fr))]">
-            {jobs.map((job) => (
-              <Card key={job.id} className="w-full min-w-0">
+          <div className="w-full max-w-[1900px]">
+            <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
+              {jobs.map((job) => (
+                <Card key={job.id} className="w-full min-w-0">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-lg">{job.title}</CardTitle>
@@ -375,7 +376,8 @@ export default function Jobs() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>

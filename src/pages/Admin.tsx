@@ -270,9 +270,10 @@ export default function Admin() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,25em),1fr))]">
-            {sortedUsers.map((user) => (
-              <Card key={user.id} className="w-full min-w-0">
+          <div className="w-full max-w-[1900px]">
+            <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,28em),1fr))]">
+              {sortedUsers.map((user) => (
+                <Card key={user.id} className="w-full min-w-0">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
@@ -387,7 +388,8 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              ))}
+            </div>
           </div>
         )}
       </div>
