@@ -13,7 +13,7 @@ export default function Recovery() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
-  const { updatePassword, user, loading } = useAuth();
+  const { updatePassword, user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -49,6 +49,15 @@ export default function Recovery() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <Button
+                className="w-full"
+                onClick={async () => {
+                  await signOut();
+                  navigate("/recovery", { replace: true });
+                }}
+              >
+                Logga ut och försök igen
+              </Button>
               <Button className="w-full" onClick={() => navigate("/dashboard")}>
                 Tillbaka till startsidan
               </Button>
