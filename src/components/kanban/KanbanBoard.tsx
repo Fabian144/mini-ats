@@ -89,6 +89,14 @@ export default function KanbanBoard() {
       if (!container) return;
 
       const rect = container.getBoundingClientRect();
+      if (clientX === 0 && rect.left === 0) {
+        stopAutoScroll();
+        return;
+      }
+      if (clientX < rect.left || clientX > rect.right) {
+        stopAutoScroll();
+        return;
+      }
       const edge = 96;
       let velocity = 0;
 
