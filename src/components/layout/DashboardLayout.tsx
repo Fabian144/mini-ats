@@ -188,7 +188,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
       toast({
         title: "Uppdaterat!",
         description: emailChanged
-          ? "E-postbytet kräver bekräftelse via både den gamla och nya adressen."
+          ? "E-postbytet kräver bekräftelse via den nya mejladressen."
           : "Dina profiluppgifter har uppdaterats.",
       });
       setIsIdentityDialogOpen(false);
@@ -315,7 +315,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
           <DialogHeader>
             <DialogTitle>Uppdatera profil</DialogTitle>
             <DialogDescription>
-              Om du byter e-post måste du bekräfta bytet via både den gamla och nya adressen.
+              Om du byter e-post måste du bekräfta bytet via den nya mejladressen.
             </DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={handleIdentitySave}>

@@ -5,10 +5,10 @@ import { CheckCircle } from "lucide-react";
 
 export default function EmailConfirmed() {
   useEffect(() => {
-    // Auto-redirect to dashboard after 10 seconds
+    // Auto-redirect to dashboard after 5 seconds
     const timer = setTimeout(() => {
       window.location.href = "/mini-ats/dashboard";
-    }, 10000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -21,7 +21,7 @@ export default function EmailConfirmed() {
         </div>
         <h1 className="text-3xl font-bold mb-2">E-post bekräftad!</h1>
         <p className="text-muted-foreground mb-8">
-          Din e-postadress har bekräftats, se till att bekräfta den på båda mejladresserna. Du
+          Din e-postadress har bekräftats. Du
           omdirigeras till startsidan inom några sekunder...
         </p>
         <Link to="/dashboard">
