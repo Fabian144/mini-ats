@@ -179,9 +179,9 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
         setProfileName(nextName);
       }
 
-      if (emailChanged) {
-        setProfileEmail(nextEmail ?? "");
-      }
+      // Note: Email will update automatically via the useEffect watching user?.email
+      // once the user confirms the email change via the confirmation links.
+      // We don't update it here because it hasn't been confirmed in the backend yet.
 
       toast({
         title: "Uppdaterat!",
@@ -313,7 +313,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
           <DialogHeader>
             <DialogTitle>Uppdatera profil</DialogTitle>
             <DialogDescription>
-              Om du byter e-post måste du bekräfta via både gamla och nya adressen.
+              Om du byter e-post måste du bekräfta bytet via både den gamla och nya adressen.
             </DialogDescription>
           </DialogHeader>
           <form className="space-y-4" onSubmit={handleIdentitySave}>
