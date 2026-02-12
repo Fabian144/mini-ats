@@ -10,7 +10,7 @@ The application features an authentication system, role-based access control (Ad
 -   **Kanban Board**: A dynamic, drag-and-drop interface to visualize and manage the candidate pipeline (New, Screening, Interview, Offer, Hired, Rejected).
 -   **Job Management**: Create, read, update, and delete job postings.
 -   **Candidate Management**: Add, edit, and delete candidates, associating them with specific jobs.
--   **Admin Dashboard**: A dedicated view for administrators to manage all users, create new accounts, and view/modify data across all customer accounts.
+-   **Admin Dashboard**: A dedicated view for administrators to manage all users, create new accounts and view/modify data across all customer accounts.
 -   **Role-Based Access**: Differentiates between 'Admin' and 'Customer' roles, with Row Level Security (RLS) policies in Supabase ensuring data privacy.
 -   **Intuitive UI**: Smooth and immediate UI feedback for actions like updating candidate status, with user friendly error handling.
 -   **Responsive Design**: A user-friendly experience on both desktop and mobile devices.
