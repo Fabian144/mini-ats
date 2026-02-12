@@ -41,7 +41,7 @@ export default function Recovery() {
     );
   }
 
-  if (Number.isNaN(historyCount) || historyCount > 1 || hasErrorParam) {
+  if (Number.isNaN(historyCount) || historyCount > 1 || hasErrorParam || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md animate-fade-in">
