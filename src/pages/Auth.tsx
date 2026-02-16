@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Users, Briefcase } from "lucide-react";
+import { hasAuthCookieSession } from "@/integrations/supabase/client";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && hasAuthCookieSession()) {
       navigate("/dashboard", { replace: true });
     }
   }, [authLoading, navigate, user]);

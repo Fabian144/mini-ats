@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { hasAuthCookieSession, supabase } from "@/integrations/supabase/client";
 
 export default function Recovery() {
   const [newPassword, setNewPassword] = useState("");
@@ -17,7 +18,6 @@ export default function Recovery() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const historyCount = Number.parseInt(sessionStorage.getItem("route_history_count") ?? "1", 10);
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
   const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
@@ -29,10 +29,6 @@ export default function Recovery() {
     hashParams.has("error_code") ||
     hashParams.has("error_description");
 
-  useEffect(() => {
-    supabase.auth.getSession();
-  }, []);
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -41,7 +37,31 @@ export default function Recovery() {
     );
   }
 
-  if (Number.isNaN(historyCount) || historyCount > 1 || hasErrorParam || !user) {
+  if (hasAuthCookieSession()) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md animate-fade-in">
+          <Card className="glass-card">
+            <CardHeader className="text-center pb-2">
+              <CardTitle>Du är redan inloggad</CardTitle>
+              <CardDescription>
+                Du kan inte återställa lösenordet medan du är inloggad. Logga ut och försök igen.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" onClick={() => navigate("/dashboard")}>
+                Gå till startsidan
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  const effectiveUser = user;
+
+  if (hasErrorParam || !effectiveUser) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md animate-fade-in">
@@ -113,6 +133,7 @@ export default function Recovery() {
         description: "Du kan nu logga in med ditt nya lösenord.",
       });
       clearRecoveryUrl();
+      await signOut();
       navigate("/auth");
     }
 

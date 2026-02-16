@@ -8,7 +8,11 @@ import {
   ReactNode,
 } from "react";
 import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  enableAuthCookieWriteOnce,
+  resetAuthCookieWrite,
+  supabase,
+} from "@/integrations/supabase/client";
 
 interface AuthContextType {
   user: User | null;
@@ -146,23 +150,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { display_name: fullName },
-        emailRedirectTo: window.location.origin,
-      },
-    });
-    return { error };
+    enableAuthCookieWriteOnce();
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { display_name: fullName },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+      return { error };
+    } finally {
+      resetAuthCookieWrite();
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    enableAuthCookieWriteOnce();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    } finally {
+      resetAuthCookieWrite();
+    }
   };
 
   const resetPassword = async (email: string) => {

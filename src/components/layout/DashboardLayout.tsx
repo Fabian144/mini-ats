@@ -2,7 +2,11 @@ import { ReactNode, memo, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  enableAuthCookieClearOnce,
+  resetAuthCookieClear,
+  supabase,
+} from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,8 +133,13 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   }, [effectiveUserId, queryClient]);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    enableAuthCookieClearOnce();
+    try {
+      await signOut();
+      navigate("/auth");
+    } finally {
+      resetAuthCookieClear();
+    }
   };
 
   const handleIdentitySave = async (event: React.FormEvent) => {

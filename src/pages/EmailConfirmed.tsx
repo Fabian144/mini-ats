@@ -6,7 +6,6 @@ import { CheckCircle } from "lucide-react";
 
 export default function EmailConfirmed() {
   const navigate = useNavigate();
-  const historyCount = Number.parseInt(sessionStorage.getItem("route_history_count") ?? "1", 10);
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
   const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
@@ -18,7 +17,7 @@ export default function EmailConfirmed() {
     hashParams.has("error_code") ||
     hashParams.has("error_description");
 
-  if (Number.isNaN(historyCount) || historyCount > 1 || hasErrorParam) {
+  if (hasErrorParam) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-md animate-fade-in">
