@@ -1,27 +1,27 @@
 # TalentTrack (Mini ATS) 👥
 
-A lightweight, modern Applicant Tracking System (ATS) built with React, Vite, and Supabase. It provides a clean interface for managing job openings and tracking candidates through the hiring pipeline using a drag-and-drop Kanban board.
+<div align="center">
+  
+[![Live Demo](https://img.shields.io/badge/Live_demo-TalentTrack-g?style=for-the-badge&logo=github)](https://fabian144.github.io/mini-ats/)
 
-The application features an authentication system, role-based access control (Admin and Customer roles), and a responsive design that works across all devices.
+A lightweight, modern Applicant Tracking System built with **React**, **Vite**, and **Supabase**. Manage job openings and track candidates through the hiring pipeline using a drag-and-drop Kanban board and more.
+
+</div>
 
 ## Features 🧰
 
 -   **User Authentication**: Secure sign-up, sign-in, password recovery, and account deletion powered by Supabase Auth.
+-   **Admin Dashboard**: A dedicated view for administrators to manage all users, create new accounts and view/modify data across all customer accounts.
 -   **Kanban Board**: A dynamic, drag-and-drop interface to visualize and manage the candidate pipeline (New, Screening, Interview, Offer, Hired, Rejected).
 -   **Job Management**: Create, read, update, and delete job postings.
--   **Candidate Management**: Add, edit, and delete candidates, associating them with specific jobs.
--   **Admin Dashboard**: A dedicated view for administrators to manage all users, create new accounts and view/modify data across all customer accounts.
--   **Role-Based Access**: Differentiates between 'Admin' and 'Customer' roles, with Row Level Security (RLS) policies in Supabase ensuring data privacy.
--   **Intuitive UI**: Smooth and immediate UI feedback for actions like updating candidate status, with user friendly error handling.
--   **Responsive Design**: A user-friendly experience on both desktop and mobile devices.
-
-### Live demo: https://fabian144.github.io/mini-ats/
+-   **Candidate Management**: Add, edit, delete and associate candidates with specific jobs.
+-   **Intuitive UI**: Smooth and immediate UI with user friendly error handling.
+-   **Responsive Design**: Works well on both desktop and mobile devices.
 
 ## Tech Stack 🛠️
 
 -   **Frontend**: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
 -   **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
--   **UI Components**: [Shadcn UI](https://ui.shadcn.com/) built on [Radix UI](https://www.radix-ui.com/)
 -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 -   **State Management**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
 -   **Routing**: [React Router](https://reactrouter.com/)
@@ -36,9 +36,9 @@ The backend is built on Supabase, utilizing features such as:
 -   **PostgreSQL Functions & Triggers**: Database indexes are used to optimize RLS performance on queries.
 -   **Migrations**: Almost the whole database schema, including tables, roles, policies, and functions, is managed through SQL migration files located in the `supabase/migrations` directory.
 
-## Getting Started
+## Run project locally
 
-To run this project locally, follow these steps:
+Follow these steps to run this project in a development server:
 
 1.  **Clone the repository:**
     ```sh
@@ -56,14 +56,14 @@ To run this project locally, follow these steps:
     -   Navigate to the **SQL Editor** in your Supabase project dashboard.
     -   Copy the contents of the SQL files from the `supabase/migrations` directory and run them in the editor to set up your database schema and policies.
     -   Go to **Project Settings** > **API**.
-    -   Find your **Project URL** and `anon` **Public Key**.
+    -   Copy your **Publishable key**.
 
 4.  **Configure environment variables:**
-    -   Create a `.env.local` file in the root of the project.
-    -   Add your Supabase credentials to the file:
+    -   Create a `.env` file in the root of the project.
+    -   Add the project URL and publishable key:
         ```env
-        VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-        VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_ANON_KEY
+        VITE_SUPABASE_URL=https://yourprojectid.supabase.co
+        VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
         ```
 
 5.  **Run the development server:**
