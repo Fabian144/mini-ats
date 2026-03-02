@@ -18,15 +18,6 @@ A lightweight, modern Applicant Tracking System built with **React**, **Vite**, 
 -   **Intuitive UI**: Smooth and immediate UI with user friendly error handling.
 -   **Responsive Design**: Works well on both desktop and mobile devices.
 
-## Tech Stack 🛠️
-
--   **Frontend**: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
--   **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
--   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **State Management**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
--   **Routing**: [React Router](https://reactrouter.com/)
--   **Forms**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
-
 ## Backend with Supabase 💻
 
 The backend is built on Supabase, utilizing features such as:
@@ -77,3 +68,12 @@ Follow these steps to run this project in a development server:
 -   `npm run build`: Builds the application for production.
 -   `npm run lint`: Lints the codebase using ESLint.
 -   `npm run deploy`: Builds and deploys the application to GitHub Pages.
+
+## Tech Stack 🛠️
+
+-   **Frontend**: [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/), [Vite](https://vitejs.dev/)
+-   **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
+-   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+-   **State Management**: [TanStack Query (React Query)](https://tanstack.com/query/latest)
+-   **Routing**: [React Router](https://reactrouter.com/)
+-   **Forms**: [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
