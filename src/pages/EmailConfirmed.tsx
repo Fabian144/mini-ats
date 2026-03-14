@@ -1,21 +1,20 @@
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle } from 'lucide-react';
 
 export default function EmailConfirmed() {
   const navigate = useNavigate();
   const url = new URL(window.location.href);
   const searchParams = url.searchParams;
-  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ''));
   const hasErrorParam =
-    searchParams.has("error") ||
-    searchParams.has("error_code") ||
-    searchParams.has("error_description") ||
-    hashParams.has("error") ||
-    hashParams.has("error_code") ||
-    hashParams.has("error_description");
+    searchParams.has('error') ||
+    searchParams.has('error_code') ||
+    searchParams.has('error_description') ||
+    hashParams.has('error') ||
+    hashParams.has('error_code') ||
+    hashParams.has('error_description');
 
   if (hasErrorParam) {
     return (
@@ -27,7 +26,7 @@ export default function EmailConfirmed() {
               <CardDescription>Länken verkar vara för gammal eller redan använd.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" onClick={() => navigate("/auth")}>
+              <Button className="w-full" onClick={() => navigate('/auth')}>
                 Tillbaka till startsidan
               </Button>
             </CardContent>
