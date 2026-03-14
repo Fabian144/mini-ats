@@ -37,15 +37,6 @@ export default function EmailConfirmed() {
     );
   }
 
-  useEffect(() => {
-    // Auto-redirect to dashboard after 5 seconds
-    const timer = setTimeout(() => {
-      window.location.href = "/mini-ats/dashboard";
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
