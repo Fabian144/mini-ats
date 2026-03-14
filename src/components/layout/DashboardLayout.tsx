@@ -214,9 +214,9 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen bg-background flex flex-col md:h-svh md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-sidebar text-sidebar-foreground flex flex-col">
+      <aside className="w-full md:w-64 bg-sidebar text-sidebar-foreground flex flex-col md:h-svh md:max-h-svh md:overflow-hidden">
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-sidebar-primary flex items-center justify-center">
@@ -237,7 +237,7 @@ const DashboardLayout = memo(function DashboardLayout({ children }: DashboardLay
           )}
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 md:overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.href;
             return (
