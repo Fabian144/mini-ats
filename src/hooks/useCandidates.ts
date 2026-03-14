@@ -103,7 +103,7 @@ export function useCandidates() {
 
   const updateCandidate = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Candidate> & { id: string }) => {
-      const { jobs, ...cleanUpdates } = updates as any;
+      const { jobs: _jobs, ...cleanUpdates } = updates;
       const { data, error } = await supabase
         .from("candidates")
         .update(cleanUpdates)
