@@ -6,13 +6,13 @@ import {
   useRef,
   useCallback,
   ReactNode,
-} from "react";
-import { User, Session } from "@supabase/supabase-js";
+} from 'react';
+import { User, Session } from '@supabase/supabase-js';
 import {
   enableAuthCookieWriteOnce,
   resetAuthCookieWrite,
   supabase,
-} from "@/integrations/supabase/client";
+} from '@/integrations/supabase/client';
 
 interface AuthContextType {
   user: User | null;
@@ -46,37 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const initialised = useRef(false);
 
   const checkAdminRole = useCallback(async (userId: string) => {
-    // Check sessionStorage cache first to avoid blocking render
-    const cacheKey = `admin_role_${userId}`;
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached !== null) {
-      // Still verify in background but return cached value immediately
-      const cachedResult = cached === "true";
-      supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle()
-        .then(({ data }) => {
-          const fresh = !!data;
-          if (fresh !== cachedResult) {
-            sessionStorage.setItem(cacheKey, String(fresh));
-            setIsAdmin(fresh);
-          }
-        });
-      return cachedResult;
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .eq('role', 'admin')
+      .maybeSingle();
+
+    if (error) {
+      console.error('Failed to validate admin role', error);
+      return false;
     }
 
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    const result = !!data;
-    sessionStorage.setItem(cacheKey, String(result));
-    return result;
+    return !!data;
   }, []);
 
   useEffect(() => {
@@ -121,11 +103,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAdmin) {
       setAdminViewAccountState(null);
-      sessionStorage.removeItem("admin_view_account");
+      sessionStorage.removeItem('admin_view_account');
       return;
     }
 
-    const stored = sessionStorage.getItem("admin_view_account");
+    const stored = sessionStorage.getItem('admin_view_account');
     if (!stored) return;
 
     try {
@@ -133,19 +115,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (parsed?.id && parsed?.email) {
         setAdminViewAccountState(parsed);
       } else {
-        sessionStorage.removeItem("admin_view_account");
+        sessionStorage.removeItem('admin_view_account');
       }
     } catch {
-      sessionStorage.removeItem("admin_view_account");
+      sessionStorage.removeItem('admin_view_account');
     }
   }, [isAdmin]);
 
   const setAdminViewAccount = useCallback((account: AdminViewAccount | null) => {
     setAdminViewAccountState(account);
     if (account) {
-      sessionStorage.setItem("admin_view_account", JSON.stringify(account));
+      sessionStorage.setItem('admin_view_account', JSON.stringify(account));
     } else {
-      sessionStorage.removeItem("admin_view_account");
+      sessionStorage.removeItem('admin_view_account');
     }
   }, []);
 
@@ -192,26 +174,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    // Clear cached admin role
-    if (user?.id) {
-      sessionStorage.removeItem(`admin_role_${user.id}`);
-    }
-    sessionStorage.removeItem("admin_view_account");
+    sessionStorage.removeItem('admin_view_account');
     await supabase.auth.signOut();
   };
 
   const deleteAccount = async () => {
     if (!user?.id) {
-      return { error: new Error("Not authenticated") };
+      return { error: new Error('Not authenticated') };
     }
 
-    const { error } = await supabase.rpc("delete_own_account");
+    const { error } = await supabase.rpc('delete_own_account');
     if (error) {
       return { error };
     }
 
-    sessionStorage.removeItem(`admin_role_${user.id}`);
-    sessionStorage.removeItem("admin_view_account");
+    sessionStorage.removeItem('admin_view_account');
     await supabase.auth.signOut();
     return { error: null };
   };
@@ -241,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
