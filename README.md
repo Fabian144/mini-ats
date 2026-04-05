@@ -1,10 +1,11 @@
 # TalentTrack (Mini ATS) 👥
 
 <div align="center">
-  
-[![Live Demo](https://img.shields.io/badge/Live_demo-TalentTrack-g?style=for-the-badge&logo=github)](https://fabian144.github.io/mini-ats/)
+<br/>
 
 A lightweight, modern Applicant Tracking System built with **React**, **Vite**, and **Supabase**. Manage job openings and track candidates through the hiring pipeline using a drag-and-drop Kanban board and more.
+
+[![Live Demo](https://img.shields.io/badge/Live_demo-TalentTrack-g?style=for-the-badge&logo=github)](https://fabian144.github.io/mini-ats/)
 
 </div>
 
