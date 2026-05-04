@@ -20,11 +20,17 @@ A lightweight, modern Applicant Tracking System built with **React**, **Vite**, 
 
 <br/>
 <img width="1919" height="919" alt="Screenshot 2026-04-06 180413" src="https://github.com/user-attachments/assets/99ecc52f-a03b-44cc-85c3-df6c14ab6b0e" />
+<br/>
 <img width="1915" height="911" alt="Screenshot 2026-04-06 180726" src="https://github.com/user-attachments/assets/a73c5f8a-0b93-4c40-b147-5d48b0efe6b5" />
-<img width="300" height="750" alt="Screenshot 2026-04-06 180907" src="https://github.com/user-attachments/assets/c0fad861-828e-447e-a369-dc8ba36cdf1b" />
+<br/>
+<img width="300" height="650" alt="Screenshot 2026-04-06 180907" src="https://github.com/user-attachments/assets/c0fad861-828e-447e-a369-dc8ba36cdf1b" />
+<br/>
 <img width="1919" height="911" alt="Screenshot 2026-04-06 180745" src="https://github.com/user-attachments/assets/1de6b969-ad8e-486f-9541-c62c5fc2424e" />
+<br/>
 <img width="1919" height="910" alt="Screenshot 2026-04-06 180751" src="https://github.com/user-attachments/assets/acb0c4ec-5cee-4a5a-8e64-6d0c09dd0fd5" />
+<br/>
 <img width="1918" height="916" alt="Screenshot 2026-04-06 180757" src="https://github.com/user-attachments/assets/6885b3fd-5429-4667-877a-55ee44fe9852" />
+<br/>
 <img width="1919" height="910" alt="Screenshot 2026-04-06 180808" src="https://github.com/user-attachments/assets/0c988123-6008-44b7-b71e-473b715d7709" />
 
 
