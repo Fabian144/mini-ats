@@ -26,6 +26,8 @@ const shouldUseRecoveryStorage = () => {
 
 const isCodeVerifierKey = (key: string) => key.includes("code-verifier");
 
+const isAuthTokenKey = (key: string) => key.startsWith("sb-") && key.includes("auth-token");
+
 const readCookie = (name: string) => {
   if (typeof document === "undefined") return null;
   const encodedName = encodeURIComponent(name);
@@ -87,18 +89,34 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
         return sessionStorage.getItem(key);
       },
       setItem: (key: string, value: string) => {
+        // Code verifiers should always be written to cookies
         if (isCodeVerifierKey(key)) {
           writeCookie(key, value);
           return;
         }
+        
+        // Auth tokens should be persisted to cookies for cross-tab sync and persistence
+        // This includes initial tokens and refreshed tokens
+        if (isAuthTokenKey(key)) {
+          writeCookie(key, value);
+          return;
+        }
+        
+        // During login/signup, write to cookies
         if (allowSessionWrite) {
           allowSessionWrite = false;
           writeCookie(key, value);
           return;
         }
-        if (isCodeVerifierKey(key) || shouldUseRecoveryStorage()) {
+        
+        // During recovery flow, use sessionStorage
+        if (shouldUseRecoveryStorage()) {
           sessionStorage.setItem(key, value);
+          return;
         }
+        
+        // Default: store in sessionStorage
+        sessionStorage.setItem(key, value);
       },
       removeItem: (key: string) => {
         sessionStorage.removeItem(key);
